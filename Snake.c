@@ -137,10 +137,10 @@ void Snake_UpdateSnake(const float dt)
 			to_grow = 0;
 		}
 		else { // else update grid to let know empty
-			grid[(int)last_position.y * GRID_WIDTH + (int)last_position.x] = 0;
+			//grid[(int)last_position.y * GRID_WIDTH + (int)last_position.x] = 0;
 		}
 		// set new position of head in grid
-		grid[(int)snake[0].y * GRID_WIDTH + (int)snake[0].x] = 1;
+		//grid[(int)snake[0].y * GRID_WIDTH + (int)snake[0].x] = 1;
 	}
 }
 
