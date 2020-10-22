@@ -1,5 +1,6 @@
 #pragma once
 #include "CProcessing/inc/cprocessing.h"
+#include <stdio.h>
 
 #define GRID_WIDTH 16	// size of the arena square
 #define GRID_HEIGHT 16

@@ -10,20 +10,27 @@ float snake_speed_timer = 0.0f;
 
 int food_exists = 0;
 int to_grow = 0;
+int score = 0;
+double timeCount = 0;
 
 int game_over = 0;
 char* text = "";
+char scoretxt[100];
+char timer[100];
 
 void Snake_Init()
 {
 	CP_System_SetWindowSize(900, 900);
+	CP_Settings_Fill((CP_Color){ 255,255,255,255 });
+	CP_Settings_Stroke((CP_Color) { 255, 0, 255, 255 });
+	CP_Settings_TextSize(50.f);
 	// add snake of size 1 at (0,0)
 	Snake_AddSnake(0, 0);
 }
 
 void Snake_Update(const float dt)
 {
-	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
+	CP_Settings_Background((CP_Color) { 0, 0, 0, 255 });
 	Snake_UpdateSnake(dt);
 	if (CP_Input_MouseClicked()) {
 		Snake_SpawnFood();
@@ -33,10 +40,16 @@ void Snake_Update(const float dt)
 		Snake_SpawnFood();
 		food_exists = 1;
 	}
+
+	//Timer Interface
+	timeCount = timeCount + dt;
+	sprintf_s(timer, 100, "Time: %.0f", timeCount);
+	CP_Font_DrawText(timer, (GRID_WIDTH * 5), (GRID_HEIGHT * 37));
 }
 
 void Snake_Render()
 {
+	
 	// render the grid x and y
 	for (int x = 0; x < GRID_WIDTH+1; x++) {
 		int x0 = GRID_START_X + x * TILE_SIZE;
@@ -74,6 +87,11 @@ void Snake_DrawSnake()
 	for (int i = 0; i < snake_size; i++) {
 		CP_Graphics_DrawRect(snake[i].x * TILE_SIZE + GRID_START_X, snake[i].y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
 	}
+
+	//Score interface
+	score++;
+	sprintf_s(scoretxt, 100, "Score: %d", score);
+	CP_Font_DrawText(scoretxt, (GRID_WIDTH * 5), (GRID_HEIGHT * 35));
 }
 
 void Snake_UpdateSnake(const float dt)
