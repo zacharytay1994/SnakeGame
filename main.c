@@ -13,14 +13,16 @@
 //---------------------------------------------------------
 
 #include "cprocessing.h"
-#include "Snake.h"
+//#include "Snake.h"
+#include "Snake_Noel.h"
 
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
 void game_init(void)
 {
 	// initialize variables and CProcessing settings for this gamestate
-	Snake_Init();
+	Level_Init_Noel();
+	Snake_Init_Noel();
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
@@ -28,8 +30,10 @@ void game_init(void)
 void game_update(void)
 {
 	// check input, update simulation, render etc.
-	Snake_Update(CP_System_GetDt());
-	Snake_Render();
+	//Snake_Update(CP_System_GetDt());
+	Level_Render_Noel();
+	Snake_Update_Noel(CP_System_GetDt());
+	Snake_Render_Noel();
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the exit function
@@ -37,7 +41,7 @@ void game_update(void)
 void game_exit(void)
 {
 	// shut down the gamestate and cleanup any dynamic memory
-	Snake_Free();
+	//Snake_Free();
 }
 
 // main() the starting point for the program
