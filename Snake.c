@@ -44,7 +44,7 @@ void Snake_Update(const float dt)
 	//Timer Interface
 	timeCount = timeCount + dt;
 	sprintf_s(timer, 100, "Time: %.0f", timeCount);
-	CP_Font_DrawText(timer, (GRID_WIDTH * 5), (GRID_HEIGHT * 37));
+	CP_Font_DrawText(timer, (GRID_WIDTH * 2), (GRID_HEIGHT * 35));
 }
 
 void Snake_Render()
@@ -89,9 +89,8 @@ void Snake_DrawSnake()
 	}
 
 	//Score interface
-	score++;
 	sprintf_s(scoretxt, 100, "Score: %d", score);
-	CP_Font_DrawText(scoretxt, (GRID_WIDTH * 5), (GRID_HEIGHT * 35));
+	CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
 }
 
 void Snake_UpdateSnake(const float dt)
@@ -176,6 +175,7 @@ void Snake_AddSnake(const int x, const int y)
 void Snake_GrowSnake()
 {
 	to_grow = 1;
+	score++;
 }
 
 void Snake_SpawnFood()
