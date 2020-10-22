@@ -16,6 +16,7 @@ struct Snake
 
 	float snake_speed;
 	char is_alive;
+	char is_growing;
 };
 
 struct Snake sneko;
@@ -23,9 +24,11 @@ struct Snake sneko;
 void Level_Init_Noel();
 void Snake_Init_Noel();
 
+void Level_Update_Noel();
 void Snake_Update_Noel(const float dt);
 void Snake_Movement_Noel(const float dt);
 void Snake_Death_Check();
+void Snake_Collision_Check_Level();
 void Snake_Input_Noel();
 
 void Level_Render_Noel();

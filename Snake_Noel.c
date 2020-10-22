@@ -1,12 +1,22 @@
 #include "Snake_Noel.h"
+#include <stdlib.h>
 
 int TILE_SIZE_NOEL = 30;	// size of each arena tile
 float timer = 0;
+int level_grid[GRID_WIDTH_NOEL][GRID_HEIGHT_NOEL];
 
 void Level_Init_Noel()
 {
 	CP_System_SetWindowSize(900, 900);
 	TILE_SIZE_NOEL = (CP_System_GetWindowWidth() - 60) / GRID_WIDTH_NOEL;
+	for (int i = 0; i < GRID_WIDTH_NOEL; i++)
+	{
+		for (int j = 0; j < GRID_HEIGHT_NOEL; j++)
+		{
+			level_grid[i][j] = 0;
+		}
+	}
+	level_grid[rand() % GRID_WIDTH_NOEL][rand() % GRID_HEIGHT_NOEL] = 1;
 }
 
 void Snake_Init_Noel()
@@ -16,6 +26,7 @@ void Snake_Init_Noel()
 	sneko.snake_direction = 0;
 	sneko.snake_speed = 10.f / 60.f;
 	sneko.is_alive = 1;
+	sneko.is_growing = 0;
 	for (unsigned int i = 0; i < 127; i++)
 	{
 		sneko.snake_body_x[i] = -1;
@@ -55,6 +66,12 @@ void Snake_Movement_Noel(const float dt)
 			}
 			else
 			{
+				if (sneko.is_growing && i != 126)
+				{
+					sneko.snake_body_x[i+1] = sneko.snake_body_x[i];
+					sneko.snake_body_y[i+1] = sneko.snake_body_y[i];
+					sneko.is_growing = 0;
+				}
 				sneko.snake_body_x[i] = sneko.snake_body_x[i-1];
 				sneko.snake_body_y[i] = sneko.snake_body_y[i-1];
 			}
@@ -77,7 +94,19 @@ void Snake_Movement_Noel(const float dt)
 			break;
 		}
 
+		Snake_Collision_Check_Level();
 		Snake_Death_Check();
+	}
+}
+
+void Snake_Collision_Check_Level()
+{
+	switch(level_grid[sneko.snake_head_x][sneko.snake_head_y])
+	{
+	case 1:
+		level_grid[sneko.snake_head_x][sneko.snake_head_y] = 0;
+		level_grid[rand() % GRID_WIDTH_NOEL][rand() % GRID_HEIGHT_NOEL] = 1;
+		sneko.is_growing = 1;
 	}
 }
 
@@ -99,10 +128,18 @@ void Snake_Input_Noel()
 
 void Snake_Death_Check()
 {
-	if ((sneko.snake_head_x < 0) || (sneko.snake_head_x > GRID_WIDTH_NOEL)
-		|| (sneko.snake_head_y < 0) || (sneko.snake_head_y > GRID_HEIGHT_NOEL))
+	if ((sneko.snake_head_x < 0) || (sneko.snake_head_x > GRID_WIDTH_NOEL -1)
+		|| (sneko.snake_head_y < 0) || (sneko.snake_head_y > GRID_HEIGHT_NOEL -1))
 	{
 		sneko.is_alive = 0;
+	}
+}
+
+void Level_Update_Noel()
+{
+	if (CP_Input_KeyDown(KEY_R)) {
+		Level_Init_Noel();
+		Snake_Init_Noel();
 	}
 }
 
@@ -118,10 +155,24 @@ void Level_Render_Noel()
 		int y0 = 30 + y * TILE_SIZE_NOEL;
 		CP_Graphics_DrawLine(30, (float)y0, 30 + GRID_WIDTH_NOEL * (float)TILE_SIZE_NOEL, (float)y0);
 	}
+
+	for (int i = 0; i < GRID_HEIGHT_NOEL; i++)
+	{
+		for (int j = 0; j < GRID_WIDTH_NOEL; j++)
+		{
+			switch (level_grid[i][j])
+			{
+			case 1:
+				CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
+				CP_Graphics_DrawCircle((i * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), (j * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), 30);
+			}
+		}
+	}
 }
 
 void Snake_Render_Noel()
 {
+	CP_Settings_Fill(CP_Color_Create(0, 255, 0, 255));
 	CP_Graphics_DrawCircle((sneko.snake_head_x * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), (sneko.snake_head_y * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), 30);
 	for (unsigned int i = 0; i < 127; i++)
 	{
@@ -129,6 +180,7 @@ void Snake_Render_Noel()
 		{
 			break;
 		}
+		CP_Settings_Fill(CP_Color_Create(0, 155, 0, 255));
 		CP_Graphics_DrawCircle((sneko.snake_body_x[i] * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), (sneko.snake_body_y[i] * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), 30);
 	}
 }
