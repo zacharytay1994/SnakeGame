@@ -31,6 +31,7 @@ void game_update(void)
 {
 	// check input, update simulation, render etc.
 	//Snake_Update(CP_System_GetDt());
+	Level_Update_Noel();
 	Level_Render_Noel();
 	Snake_Update_Noel(CP_System_GetDt());
 	Snake_Render_Noel();
