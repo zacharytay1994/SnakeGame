@@ -44,7 +44,13 @@ struct Snake_Profile
 	char is_alive;
 	CP_Color HeadColor;
 	CP_Color BodyColor;
+	CP_KEY Button_Up;
+	CP_KEY Button_Left;
+	CP_KEY Button_Right;
+	CP_KEY Button_Down;
 };
+
+struct Snake_Profile Players[4];
 
 void Level_Init();
 void Snake_Init();
@@ -52,8 +58,8 @@ void Snake_Update(const float dt);
 void Snake_Render();
 void Snake_Free();
 
-void Snake_DrawSnake();
-void Snake_UpdateSnake(const float dt);
+void Snake_DrawSnake(struct Snake_Profile *snake);
+void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
 void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake);
 
 void Snake_SpawnFood();
