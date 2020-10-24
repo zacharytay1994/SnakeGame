@@ -12,6 +12,8 @@ int food_exists = 0;
 int game_over = 0;
 char* text = "";
 struct Snake_Profile snake1;
+struct Snake_Profile snake2;
+struct Snake_Profile Players[4] = { {0} };
 
 void Level_Init()
 {
@@ -29,6 +31,8 @@ void Snake_Init()
 	{
 		snake1.Position[i].x = 0;
 		snake1.Position[i].y = 0;
+		snake2.Position[i].x = 1;
+		snake2.Position[i].y = 1;
 	}
 	snake1.Size = 0;
 	snake1.Direction = Right;
@@ -38,13 +42,40 @@ void Snake_Init()
 	snake1.is_alive = 1;
 	snake1.HeadColor = GREEN;
 	snake1.BodyColor = DARK_GREEN;
+	snake1.Button_Up = KEY_UP;
+	snake1.Button_Left = KEY_LEFT;
+	snake1.Button_Right = KEY_RIGHT;
+	snake1.Button_Down = KEY_DOWN;
 	Snake_GrowSnake(0, 0, &snake1);
+	Players[0] = snake1;
+
+	snake2.Size = 0;
+	snake2.Direction = Right;
+	snake2.Speed_Multiplier = 4.0f;
+	snake2.Speed = 1;
+	snake2.to_grow = 0;
+	snake2.is_alive = 1;
+	snake2.HeadColor = BLUE;
+	snake2.BodyColor = DARK_BLUE;
+	snake2.Button_Up = KEY_W;
+	snake2.Button_Left = KEY_A;
+	snake2.Button_Right = KEY_D;
+	snake2.Button_Down = KEY_S;
+	Snake_GrowSnake(0, 0, &snake2);
+	Players[1] = snake2;
+
 }
 
 void Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
-	Snake_UpdateSnake(dt);
+	for (int i = 0; i < 4; i++)
+	{
+		if (Players[i].is_alive == 1)
+		{
+			Snake_UpdateSnake(dt, &Players[i]);
+		}
+	}
 	if (CP_Input_MouseClicked()) {
 		Snake_SpawnFood();
 		snake1.to_grow = 1;
@@ -67,7 +98,13 @@ void Snake_Render()
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
 	// render snake
-	Snake_DrawSnake();
+	for (int i = 0; i < 4; i++)
+	{
+		if (Players[i].is_alive == 1)
+		{
+			Snake_DrawSnake(&Players[i]);
+		}
+	}
 
 	// render food
 	for (int y = 0; y < GRID_HEIGHT; y++) {
@@ -89,83 +126,83 @@ void Snake_Free() {
 
 }
 
-void Snake_DrawSnake()
+void Snake_DrawSnake(struct Snake_Profile *snake)
 {
 	// for each cell in snake, draw a square there of tile size
-	for (int i = 0; i < snake1.Size; i++) {
+	for (int i = 0; i < snake->Size; i++) {
 		if (i == 0)
-		{ CP_Settings_Fill(snake1.HeadColor); }
-		else { CP_Settings_Fill(snake1.BodyColor); }
-		CP_Graphics_DrawRect(snake1.Position[i].x * TILE_SIZE + GRID_START_X, snake1.Position[i].y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);		
+		{ CP_Settings_Fill(snake->HeadColor); }
+		else { CP_Settings_Fill(snake->BodyColor); }
+		CP_Graphics_DrawRect(snake->Position[i].x * TILE_SIZE + GRID_START_X, snake->Position[i].y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
 	}
 }
 
-void Snake_UpdateSnake(const float dt)
+void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 {
 	// SNAKE INPUT
-	if (CP_Input_KeyDown(KEY_RIGHT) && snake1.PreviousDirection != Left) {
-		snake1.Direction = Right;
+	if (CP_Input_KeyDown(snake->Button_Right) && snake->PreviousDirection != Left) {
+		snake->Direction = Right;
 	}
-	if (CP_Input_KeyDown(KEY_LEFT) && snake1.PreviousDirection != Right) {
-		snake1.Direction = Left;
+	if (CP_Input_KeyDown(snake->Button_Left) && snake->PreviousDirection != Right) {
+		snake->Direction = Left;
 	}
-	if (CP_Input_KeyDown(KEY_UP) && snake1.PreviousDirection != Down) {
-		snake1.Direction = Up;
+	if (CP_Input_KeyDown(snake->Button_Up) && snake->PreviousDirection != Down) {
+		snake->Direction = Up;
 	}
-	if (CP_Input_KeyDown(KEY_DOWN) && snake1.PreviousDirection != Up) {
-		snake1.Direction = Down;
+	if (CP_Input_KeyDown(snake->Button_Down) && snake->PreviousDirection != Up) {
+		snake->Direction = Down;
 	}
 	// UPDATE SNAKE POSITION
 	// each cell in snake that is not the head will go to the cell in front, head will go in direction of snake_direction
 	// check snake speed and move snake
-	if (snake_speed_timer < (float)snake1.Speed / snake1.Speed_Multiplier) {
+	if (snake_speed_timer < (float)snake->Speed / snake->Speed_Multiplier) {
 		snake_speed_timer += dt;
 	}
 	else { // if timer up move snake once
 		snake_speed_timer = 0.0f;
-		CP_Vector last_position = snake1.Position[snake1.Size - 1];
+		CP_Vector last_position = snake->Position[snake->Size - 1];
 		// move snek
-		for (int i = snake1.Size - 1; i > 0; i--) {
-			snake1.Position[i] = snake1.Position[i - 1];
+		for (int i = snake->Size - 1; i > 0; i--) {
+			snake->Position[i] = snake->Position[i - 1];
 		}
-		switch (snake1.Direction) {
+		switch (snake->Direction) {
 		case Right:
-			snake1.Position[0].x += 1;
+			snake->Position[0].x += 1;
 			break;
 		case Left:
-			snake1.Position[0].x -= 1;
+			snake->Position[0].x -= 1;
 			break;
 		case Up:
-			snake1.Position[0].y -= 1;
+			snake->Position[0].y -= 1;
 			break;
 		case Down:
-			snake1.Position[0].y += 1;
+			snake->Position[0].y += 1;
 			break;
 		}
-		snake1.PreviousDirection = snake1.Direction;
+		snake->PreviousDirection = snake->Direction;
 		// if snake collide with food
-		if (grid[(int)snake1.Position[0].y][(int)snake1.Position[0].x] == 2) {
-			snake1.to_grow = 1;
+		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 2) {
+			snake->to_grow = 1;
 			//Check_For_Food();
 		}
 		// game over conditions - hit itself
-		if (grid[(int)snake1.Position[0].y][(int)snake1.Position[0].x] == 1) {
+		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 1) {
 			game_over = 1;
 		}
 		// - exceeed bounds
-		if ((int)snake1.Position[0].y < 0 || (int)snake1.Position[0].y >= GRID_HEIGHT || (int)snake1.Position[0].x < 0 || (int)snake1.Position[0].x >= GRID_WIDTH) {
+		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
 			game_over = 1;
 		}
 		// set last position of snake in grid to 0
-		if (snake1.to_grow) { // if to grow, add a new snake cell at last position
-			Snake_GrowSnake((int)last_position.x, (int)last_position.y, &snake1);
-			snake1.to_grow = 0;
+		if (snake->to_grow) { // if to grow, add a new snake cell at last position
+			Snake_GrowSnake((int)last_position.x, (int)last_position.y, snake);
+			snake->to_grow = 0;
 		}
 		else { // else update grid to let know empty
 			grid[(int)last_position.y][(int)last_position.x] = 0;
 		}
 		// set new position of head in grid
-		grid[(int)snake1.Position[0].y ][(int)snake1.Position[0].x] = 1;
+		grid[(int)snake->Position[0].y ][(int)snake->Position[0].x] = 1;
 
 		Check_For_Food();
 	}
