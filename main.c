@@ -20,6 +20,7 @@
 void game_init(void)
 {
 	// initialize variables and CProcessing settings for this gamestate
+	Level_Init();
 	Snake_Init();
 }
 
