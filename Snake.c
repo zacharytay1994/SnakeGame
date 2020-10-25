@@ -11,8 +11,6 @@ float snake_speed_timer = 0.0f;
 int food_exists = 0;
 int game_over = 0;
 char* text = "";
-struct Snake_Profile snake1;
-struct Snake_Profile snake2;
 struct Snake_Profile Players[4] = { {0} };
 
 void Level_Init()
@@ -120,7 +118,7 @@ void Snake_Update(const float dt)
 	}
 	if (CP_Input_MouseClicked()) {
 		Snake_SpawnFood();
-		snake1.to_grow = 1;
+		Players[0].to_grow = 1;
 	}
 	if (!food_exists) {
 		Snake_SpawnFood();
