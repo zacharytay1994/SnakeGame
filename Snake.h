@@ -10,6 +10,8 @@
 #define DARK_GREEN CP_Color_Create(0,155,0,255)
 #define BLUE CP_Color_Create(0,0,255,255)
 #define DARK_BLUE CP_Color_Create(0,0,155,255)
+#define YELLOW CP_Color_Create(255,255,0,255)
+#define DARK_YELLOW CP_Color_Create(155,155,0,255)
 #define GREY CP_Color_Create(100,100,100,255)
 
 float TILE_SIZE;	// size of each arena tile
@@ -34,14 +36,17 @@ typedef enum Snake_Direction {
 
 struct Snake_Profile
 {
+	short Id;
 	int Speed;
 	int Size;
 	float Speed_Multiplier;
+	float Speed_Timer;
 	CP_Vector Position[GRID_WIDTH * GRID_HEIGHT];
 	Snake_Direction PreviousDirection;
 	Snake_Direction Direction;
 	char to_grow;
 	char is_alive;
+	char is_exists;
 	CP_Color HeadColor;
 	CP_Color BodyColor;
 	CP_KEY Button_Up;
@@ -49,8 +54,8 @@ struct Snake_Profile
 	CP_KEY Button_Right;
 	CP_KEY Button_Down;
 };
-
 struct Snake_Profile Players[4];
+void Add_Player(short id);
 
 void Level_Init();
 void Snake_Init();

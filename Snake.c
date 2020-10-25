@@ -22,48 +22,90 @@ void Level_Init()
 	TILE_SIZE = (((float)CP_System_GetWindowHeight() - (float)GRID_START_Y - 5) / (float)GRID_HEIGHT);
 	// Centers the level
 	GRID_START_X = (int)((float)CP_System_GetWindowWidth() - (GRID_WIDTH * TILE_SIZE)) / 2;
+	for (int i = 0; i < GRID_WIDTH; i++)
+	{
+		for (int j = 0; j < GRID_HEIGHT; j++)
+		{
+			grid[i][j] = 0;
+		}
+	}
 }
 
 void Snake_Init()
 {
-	// add snake of size 1 at (0,0)
+	Add_Player(0);
+	Add_Player(1);
+	Add_Player(2);
+	Add_Player(3);
+}
+
+void Add_Player(short id)
+{
+	struct Snake_Profile snake_new;
+	short starting_position_x = 0;
+	short starting_position_y = 0;
+	switch (id)
+	{
+	case 0:
+		snake_new.Direction = Right;
+		snake_new.HeadColor = GREEN;
+		snake_new.BodyColor = DARK_GREEN;
+		snake_new.Button_Up = KEY_UP;
+		snake_new.Button_Left = KEY_LEFT;
+		snake_new.Button_Right = KEY_RIGHT;
+		snake_new.Button_Down = KEY_DOWN;
+		starting_position_x = 1;
+		starting_position_y = 1;
+		break;
+	case 1:
+		snake_new.Direction = Down;
+		snake_new.HeadColor = BLUE;
+		snake_new.BodyColor = DARK_BLUE;
+		snake_new.Button_Up = KEY_W;
+		snake_new.Button_Left = KEY_A;
+		snake_new.Button_Right = KEY_D;
+		snake_new.Button_Down = KEY_S;
+		starting_position_x = GRID_WIDTH -2;
+		starting_position_y = 1;
+		break;
+	case 2:
+		snake_new.Direction = Left;
+		snake_new.HeadColor = RED;
+		snake_new.BodyColor = DARK_RED;
+		snake_new.Button_Up = KEY_I;
+		snake_new.Button_Left = KEY_J;
+		snake_new.Button_Right = KEY_L;
+		snake_new.Button_Down = KEY_K;
+		starting_position_x = GRID_WIDTH - 2;
+		starting_position_y = GRID_HEIGHT - 2;
+		break;
+	case 3:
+		snake_new.Direction = Up;
+		snake_new.HeadColor = YELLOW;
+		snake_new.BodyColor = DARK_YELLOW;
+		snake_new.Button_Up = KEY_KP_8;
+		snake_new.Button_Left = KEY_KP_4;
+		snake_new.Button_Right = KEY_KP_6;
+		snake_new.Button_Down = KEY_KP_5;
+		starting_position_x = 1;
+		starting_position_y = GRID_HEIGHT - 2;
+		break;
+	}
 	for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
 	{
-		snake1.Position[i].x = 0;
-		snake1.Position[i].y = 0;
-		snake2.Position[i].x = 1;
-		snake2.Position[i].y = 1;
+		snake_new.Position[i].x = starting_position_x;
+		snake_new.Position[i].y = starting_position_y;
 	}
-	snake1.Size = 0;
-	snake1.Direction = Right;
-	snake1.Speed_Multiplier = 4.0f;
-	snake1.Speed = 1;
-	snake1.to_grow = 0;
-	snake1.is_alive = 1;
-	snake1.HeadColor = GREEN;
-	snake1.BodyColor = DARK_GREEN;
-	snake1.Button_Up = KEY_UP;
-	snake1.Button_Left = KEY_LEFT;
-	snake1.Button_Right = KEY_RIGHT;
-	snake1.Button_Down = KEY_DOWN;
-	Snake_GrowSnake(0, 0, &snake1);
-	Players[0] = snake1;
-
-	snake2.Size = 0;
-	snake2.Direction = Right;
-	snake2.Speed_Multiplier = 4.0f;
-	snake2.Speed = 1;
-	snake2.to_grow = 0;
-	snake2.is_alive = 1;
-	snake2.HeadColor = BLUE;
-	snake2.BodyColor = DARK_BLUE;
-	snake2.Button_Up = KEY_W;
-	snake2.Button_Left = KEY_A;
-	snake2.Button_Right = KEY_D;
-	snake2.Button_Down = KEY_S;
-	Snake_GrowSnake(0, 0, &snake2);
-	Players[1] = snake2;
-
+	snake_new.Id = id;
+	snake_new.Size = 0;
+	snake_new.Speed_Multiplier = 4.0f;
+	snake_new.Speed = 1;
+	snake_new.to_grow = 0;
+	snake_new.is_alive = 1;
+	snake_new.is_exists = 1;
+	snake_new.Speed_Timer = 0.0f;
+	Snake_GrowSnake(starting_position_x, starting_position_y, &snake_new);
+	Players[id] = snake_new;
 }
 
 void Snake_Update(const float dt)
@@ -84,6 +126,10 @@ void Snake_Update(const float dt)
 		Snake_SpawnFood();
 		food_exists = 1;
 	}
+	if (CP_Input_KeyDown(KEY_R))
+	{
+		Reset_Game();
+	}
 }
 
 void Snake_Render()
@@ -100,7 +146,7 @@ void Snake_Render()
 	// render snake
 	for (int i = 0; i < 4; i++)
 	{
-		if (Players[i].is_alive == 1)
+		if (Players[i].is_exists == 1)
 		{
 			Snake_DrawSnake(&Players[i]);
 		}
@@ -116,10 +162,21 @@ void Snake_Render()
 		}
 	}
 
+	game_over = 1;
+	for (int i = 0; i < 4; i++)
+	{
+		if(Players[i].is_exists && Players[i].is_alive)
+		{
+			game_over = 0;
+		}
+	}
+
 	if (game_over) {
 		text = "GAME OVER!";
 	}
-	CP_Font_DrawText(text, 100.0f, 700.0f);
+	//CP_Font_DrawText(text, 100.0f, 700.0f);
+	CP_Settings_TextSize(TILE_SIZE);
+	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
 }
 
 void Snake_Free() {
@@ -155,11 +212,11 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 	// UPDATE SNAKE POSITION
 	// each cell in snake that is not the head will go to the cell in front, head will go in direction of snake_direction
 	// check snake speed and move snake
-	if (snake_speed_timer < (float)snake->Speed / snake->Speed_Multiplier) {
-		snake_speed_timer += dt;
+	if (snake->Speed_Timer < (float)snake->Speed / snake->Speed_Multiplier) {
+		snake->Speed_Timer += dt;
 	}
 	else { // if timer up move snake once
-		snake_speed_timer = 0.0f;
+		snake->Speed_Timer = 0.0f;
 		CP_Vector last_position = snake->Position[snake->Size - 1];
 		// move snek
 		for (int i = snake->Size - 1; i > 0; i--) {
@@ -187,11 +244,43 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		}
 		// game over conditions - hit itself
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 1) {
-			game_over = 1;
+			//game_over = 1;
+			snake->is_alive = 0;
+			switch (snake->Id)
+			{
+			case 0:
+				text = "Player 1 is out!";
+				break;
+			case 1:
+				text = "Player 2 is out!";
+				break;
+			case 2:
+				text = "Player 3 is out!";
+				break;
+			case 3:
+				text = "Player 4 is out!";
+				break;
+			}
 		}
 		// - exceeed bounds
 		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
-			game_over = 1;
+			//game_over = 1;
+			snake->is_alive = 0;
+			switch (snake->Id)
+			{
+			case 0:
+				text = "Player 1 is out!";
+				break;
+			case 1:
+				text = "Player 2 is out!";
+				break;
+			case 2:
+				text = "Player 3 is out!";
+				break;
+			case 3:
+				text = "Player 4 is out!";
+				break;
+			}
 		}
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
@@ -205,11 +294,6 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		grid[(int)snake->Position[0].y ][(int)snake->Position[0].x] = 1;
 
 		Check_For_Food();
-	}
-
-	if (CP_Input_KeyDown(KEY_R))
-	{
-		Reset_Game();
 	}
 }
 
@@ -245,6 +329,7 @@ void Reset_Game()
 {
 	Level_Init();
 	Snake_Init();
+	text = "";
 }
 
 void Check_For_Food()
