@@ -14,8 +14,12 @@ int game_over = 0;
 char text[127] = "";
 struct Snake_Profile Players[4] = { {0} };
 
+CP_Vector screen_shake_offset;
+float screen_shake_value;
+
 void Level_Init()
 {
+	screen_shake_offset = CP_Vector_Set(0.0f, 0.0f);
 	CP_System_SetWindowSize(900, 900);
 	// Adjust tile size according to level size
 	TILE_SIZE = (((float)CP_System_GetWindowHeight() - (float)GRID_START_Y - 5) / (float)GRID_HEIGHT);
@@ -129,6 +133,7 @@ void Snake_Update(const float dt)
 	{
 		Reset_Game();
 	}
+	Snake_Shake_Update(dt);
 }
 
 void Snake_Render()
@@ -139,11 +144,11 @@ void Snake_Render()
 	//CP_Image_Draw(gridbg, GRID_START_X + (float)(GRID_WIDTH*TILE_SIZE)/2.0f, GRID_START_Y + (float)(GRID_HEIGHT * TILE_SIZE)/2.0f, GRID_WIDTH*TILE_SIZE, GRID_HEIGHT*TILE_SIZE, 100);
 	// render the grid x and y
 	for (int x = 0; x < GRID_WIDTH+1; x++) {
-		float x0 = GRID_START_X + x * TILE_SIZE;
+		float x0 = (GRID_START_X + x * TILE_SIZE) + screen_shake_offset.x;
 		CP_Graphics_DrawLine(x0, (float)GRID_START_Y, x0, (float)GRID_START_Y + GRID_HEIGHT * TILE_SIZE);
 	}
 	for (int y = 0; y < GRID_WIDTH+1; y++) {
-		float y0 = GRID_START_Y + y * TILE_SIZE;
+		float y0 = (GRID_START_Y + y * TILE_SIZE) + screen_shake_offset.y;
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
 	// render snake
@@ -160,7 +165,7 @@ void Snake_Render()
 		for (int x = 0; x < GRID_WIDTH; x++) {
 			if (grid[y][x] == 2) {
 				CP_Settings_Fill(GREY);
-				CP_Graphics_DrawCircle((float)x * TILE_SIZE + (TILE_SIZE/2) + GRID_START_X, (float)y * TILE_SIZE + (TILE_SIZE/2) + GRID_START_Y, TILE_SIZE);
+				CP_Graphics_DrawCircle(((float)x * TILE_SIZE + (TILE_SIZE/2) + GRID_START_X) + screen_shake_offset.x, ((float)y * TILE_SIZE + (TILE_SIZE/2) + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE);
 			}
 		}
 	}
@@ -187,6 +192,33 @@ void Snake_Free() {
 
 }
 
+void Snake_Shake()
+{
+	screen_shake_value = 10.0f;
+}
+
+void Snake_Shake_Update(const float dt)
+{
+	screen_shake_offset.x = CP_Random_RangeFloat(-5.0f * screen_shake_value, 5.0f * screen_shake_value);
+	screen_shake_offset.y = CP_Random_RangeFloat(-5.0f * screen_shake_value, 5.0f * screen_shake_value);
+	// dampen
+	/*if (screen_shake_offset.x > 1.0f) {
+		screen_shake_offset.x = CP_Math_LerpFloat(screen_shake_offset.x, 0.0f, CP_System_GetDt());
+	}
+	else {
+		screen_shake_offset.x = 0.0f;
+	}
+	if (screen_shake_offset.y > 1.0f) {
+		screen_shake_offset.y = CP_Math_LerpFloat(screen_shake_offset.y, 0.0f, CP_System_GetDt());
+	}
+	else {
+		screen_shake_offset.y = 0.0f;
+	}*/
+	if (screen_shake_value > 0.0f) {
+		screen_shake_value = CP_Math_LerpFloat(screen_shake_value, 0.0f, CP_System_GetDt());
+	}
+}
+
 void Snake_DrawSnake(struct Snake_Profile *snake)
 {
 	// for each cell in snake, draw a square there of tile size
@@ -194,12 +226,12 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		if (i == 0)
 		{ CP_Settings_Fill(snake->HeadColor); }
 		else { CP_Settings_Fill(snake->BodyColor); }
-		CP_Graphics_DrawRect(snake->Position[i].x * TILE_SIZE + GRID_START_X, snake->Position[i].y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
+		CP_Graphics_DrawRect((snake->Position[i].x * TILE_SIZE + GRID_START_X) + screen_shake_offset.x, (snake->Position[i].y * TILE_SIZE + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE, TILE_SIZE);
 	}
 
 	//Score interface
-	sprintf_s(scoretxt, 100, "Score: %d", score);
-	CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
+	//sprintf_s(scoretxt, 100, "Score: %d", score);
+	//CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
 }
 
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
@@ -265,6 +297,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
 			Snake_GrowSnake((int)last_position.x, (int)last_position.y, snake);
+			Snake_Shake();
 			snake->to_grow = 0;
 		}
 		else { // else update grid to let know empty
