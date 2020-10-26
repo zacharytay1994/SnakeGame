@@ -329,7 +329,7 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 		grid[y][x] = 1;
 	}
 	else {
-		printf("You won the game!");
+		printf("You won the game!1");
 	}
 }
 
