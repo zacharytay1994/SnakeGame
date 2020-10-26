@@ -250,13 +250,13 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 1) {
 			//game_over = 1;
 			snake->is_alive = 0;
-			sprintf_s(text, 127, "Player %d is out!", snake->Id + 1);
+			sprintf_s(text, 127, "Player %d died by snake!", snake->Id + 1);
 		}
 		// - exceeed bounds
 		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
 			//game_over = 1;
 			snake->is_alive = 0;
-			sprintf_s(text, 127, "Player %d is out!", snake->Id + 1);
+			sprintf_s(text, 127, "Player %d died by border!", snake->Id + 1);
 		}
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
@@ -267,7 +267,8 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			grid[(int)last_position.y][(int)last_position.x] = 0;
 		}
 		// set new position of head in grid
-		grid[(int)snake->Position[0].y ][(int)snake->Position[0].x] = 1;
+		if(snake->is_alive)
+			grid[(int)snake->Position[0].y ][(int)snake->Position[0].x] = 1;
 
 		Check_For_Food();
 	}
