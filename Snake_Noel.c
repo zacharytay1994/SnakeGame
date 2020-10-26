@@ -4,6 +4,7 @@
 int TILE_SIZE_NOEL = 30;	// size of each arena tile
 float timer = 0;
 int level_grid[GRID_WIDTH_NOEL][GRID_HEIGHT_NOEL];
+float snakeSpeed_ry = 30.f;
 
 void Level_Init_Noel()
 {
@@ -24,7 +25,7 @@ void Snake_Init_Noel()
 	sneko.snake_head_x = 1;
 	sneko.snake_head_y = 0;
 	sneko.snake_direction = 0;
-	sneko.snake_speed = 10.f / 60.f;
+	sneko.snake_speed = 10.f / snakeSpeed_ry;
 	sneko.is_alive = 1;
 	sneko.is_growing = 0;
 	for (unsigned int i = 0; i < 127; i++)
@@ -162,7 +163,7 @@ void Level_Render_Noel()
 		{
 			switch (level_grid[i][j])
 			{
-			case 1:
+			case 1: //food
 				CP_Settings_Fill(CP_Color_Create(255, 0, 0, 255));
 				CP_Graphics_DrawCircle((i * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), (j * (float)TILE_SIZE_NOEL + 30 + ((float)TILE_SIZE_NOEL * 0.5f)), 30);
 			}
