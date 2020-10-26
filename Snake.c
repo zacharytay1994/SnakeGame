@@ -4,8 +4,10 @@
 float TILE_SIZE = 30.f;
 int GRID_START_X = 30;
 int GRID_START_Y = 150;
+int GRID_WIDTH = 19;
+int GRID_HEIGHT = 16;
 
-int grid[GRID_WIDTH][GRID_HEIGHT] = { 0 };
+int grid[127][127] = { 0 };
 float snake_speed_timer = 0.0f;
 
 int food_exists = 0;
@@ -16,6 +18,10 @@ struct Snake_Profile Players[4] = { {0} };
 
 CP_Vector screen_shake_offset;
 float screen_shake_value;
+char scoreText[100];
+char timer[100];
+float timeCount = 0.f;
+
 
 void Level_Init()
 {
@@ -25,9 +31,9 @@ void Level_Init()
 	TILE_SIZE = (((float)CP_System_GetWindowHeight() - (float)GRID_START_Y - 5) / (float)GRID_HEIGHT);
 	// Centers the level
 	GRID_START_X = (int)((float)CP_System_GetWindowWidth() - (GRID_WIDTH * TILE_SIZE)) / 2;
-	for (int i = 0; i < GRID_WIDTH; i++)
+	for (int i = 0; i < GRID_HEIGHT; i++)
 	{
-		for (int j = 0; j < GRID_HEIGHT; j++)
+		for (int j = 0; j < GRID_WIDTH; j++)
 		{
 			grid[i][j] = 0;
 		}
@@ -68,7 +74,7 @@ void Add_Player(short id)
 		snake_new.Button_Left = KEY_A;
 		snake_new.Button_Right = KEY_D;
 		snake_new.Button_Down = KEY_S;
-		starting_position_x = GRID_WIDTH -2;
+		starting_position_x = (short)GRID_WIDTH -2;
 		starting_position_y = 1;
 		break;
 	case 2:
@@ -79,8 +85,8 @@ void Add_Player(short id)
 		snake_new.Button_Left = KEY_J;
 		snake_new.Button_Right = KEY_L;
 		snake_new.Button_Down = KEY_K;
-		starting_position_x = GRID_WIDTH - 2;
-		starting_position_y = GRID_HEIGHT - 2;
+		starting_position_x = (short)GRID_WIDTH - 2;
+		starting_position_y = (short)GRID_HEIGHT - 2;
 		break;
 	case 3:
 		snake_new.Direction = Up;
@@ -91,7 +97,7 @@ void Add_Player(short id)
 		snake_new.Button_Right = KEY_KP_6;
 		snake_new.Button_Down = KEY_KP_5;
 		starting_position_x = 1;
-		starting_position_y = GRID_HEIGHT - 2;
+		starting_position_y = (short)GRID_HEIGHT - 2;
 		break;
 	}
 	for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
@@ -108,12 +114,14 @@ void Add_Player(short id)
 	snake_new.is_exists = 1;
 	snake_new.Speed_Timer = 0.0f;
 	Snake_GrowSnake(starting_position_x, starting_position_y, &snake_new);
+	snake_new.score = 0;
 	Players[id] = snake_new;
 }
 
 void Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
+	CP_Font_DrawText("Press R to restart", (float)(GRID_WIDTH * 35), (float)(GRID_HEIGHT * 7));
 	for (int i = 0; i < 4; i++)
 	{
 		if (Players[i].is_alive == 1)
@@ -133,7 +141,18 @@ void Snake_Update(const float dt)
 	{
 		Reset_Game();
 	}
+<<<<<<< HEAD
 	Snake_Shake_Update(dt);
+=======
+
+	//Timer Interface
+	if (!game_over)
+	{
+		timeCount += (float)dt;
+		sprintf_s(timer, 100, "Time: %.2f", timeCount);
+	}
+	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
+>>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 }
 
 void Snake_Render()
@@ -147,8 +166,13 @@ void Snake_Render()
 		float x0 = (GRID_START_X + x * TILE_SIZE) + screen_shake_offset.x;
 		CP_Graphics_DrawLine(x0, (float)GRID_START_Y, x0, (float)GRID_START_Y + GRID_HEIGHT * TILE_SIZE);
 	}
+<<<<<<< HEAD
 	for (int y = 0; y < GRID_WIDTH+1; y++) {
 		float y0 = (GRID_START_Y + y * TILE_SIZE) + screen_shake_offset.y;
+=======
+	for (int y = 0; y < GRID_HEIGHT+1; y++) {
+		float y0 = GRID_START_Y + y * TILE_SIZE;
+>>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
 	// render snake
@@ -169,6 +193,14 @@ void Snake_Render()
 			}
 		}
 	}
+	for (int y = 0; y < GRID_HEIGHT; y++) {
+		for (int x = 0; x < GRID_WIDTH; x++) {
+			if (grid[y][x] == 3) {
+				CP_Settings_Fill(YELLOW);
+				CP_Graphics_DrawCircle((float)x * TILE_SIZE + (TILE_SIZE/2) + GRID_START_X, (float)y * TILE_SIZE + (TILE_SIZE/2) + GRID_START_Y, TILE_SIZE);
+			}
+		}
+	}
 
 	game_over = 1;
 	for (int i = 0; i < 4; i++)
@@ -184,7 +216,7 @@ void Snake_Render()
 		sprintf_s(text, 127, "GAME OVER!");
 	}
 	//CP_Font_DrawText(text, 100.0f, 700.0f);
-	CP_Settings_TextSize(TILE_SIZE);
+	CP_Settings_TextSize(TILE_SIZE*0.85f);
 	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
 }
 
@@ -230,8 +262,31 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	}
 
 	//Score interface
+<<<<<<< HEAD
 	//sprintf_s(scoretxt, 100, "Score: %d", score);
 	//CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
+=======
+	CP_Settings_Fill(RED);
+	switch (snake->Id)
+	{
+	case 0:
+		sprintf_s(scoreText, 100, "P1 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 5));
+		break;
+	case 1:
+		sprintf_s(scoreText, 100, "P2 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 7));
+		break;
+	case 2:
+		sprintf_s(scoreText, 100, "P3 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 5));
+		break;
+	case 3:
+		sprintf_s(scoreText, 100, "P4 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 7));
+		break;
+	}
+>>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 }
 
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
@@ -286,13 +341,13 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 1) {
 			//game_over = 1;
 			snake->is_alive = 0;
-			sprintf_s(text, 127, "Player %d is out!", snake->Id + 1);
+			sprintf_s(text, 127, "Player %d died by snake!", snake->Id + 1);
 		}
 		// - exceeed bounds
 		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
 			//game_over = 1;
 			snake->is_alive = 0;
-			sprintf_s(text, 127, "Player %d is out!", snake->Id + 1);
+			sprintf_s(text, 127, "Player %d died by border!", snake->Id + 1);
 		}
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
@@ -304,7 +359,8 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			grid[(int)last_position.y][(int)last_position.x] = 0;
 		}
 		// set new position of head in grid
-		grid[(int)snake->Position[0].y ][(int)snake->Position[0].x] = 1;
+		if(snake->is_alive)
+			grid[(int)snake->Position[0].y ][(int)snake->Position[0].x] = 1;
 
 		Check_For_Food();
 	}
@@ -314,6 +370,9 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 {
 
 	if (snake->Size < GRID_WIDTH * GRID_HEIGHT) {
+		snake->score++;
+		//highscore = fopen("highscore.txt", "w");
+		//fscanf(highscore, "%c", snake->score);
 		snake->Position[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
 	}
@@ -336,6 +395,25 @@ void Snake_SpawnFood()
 		}
 	}
 	grid[rand_y][rand_x] = 2;
+
+	//Snake_SpawnPwrup();
+}
+
+void Snake_SpawnPwrup()
+{
+	int rand_x;
+	int rand_y;
+	int check = 1;
+	while (check) {
+		rand_x = CP_Random_RangeInt(0, GRID_WIDTH - 1);
+		rand_y = CP_Random_RangeInt(0, GRID_HEIGHT - 1);
+		// if not at a snake position & food position
+		if (grid[rand_y][rand_x] != 1) {
+			if(grid[rand_y][rand_x] != 2)
+			check = 0;
+		}
+	}
+	grid[rand_y][rand_x] = 3;
 }
 
 void Reset_Game()
