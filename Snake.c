@@ -320,6 +320,8 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 
 	if (snake->Size < GRID_WIDTH * GRID_HEIGHT) {
 		snake->score++;
+		//highscore = fopen("highscore.txt", "w");
+		//fscanf(highscore, "%c", snake->score);
 		snake->Position[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
 	}

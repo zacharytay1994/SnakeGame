@@ -22,6 +22,7 @@ int GRID_START_X;
 int GRID_START_Y;
 
 //int SNAKE_SPEED;
+FILE* highscore;
 
 extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food, 3 pwrup
 //extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
