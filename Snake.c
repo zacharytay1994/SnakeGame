@@ -199,9 +199,7 @@ void Snake_Update(const float dt)
 	{
 		Reset_Game();
 	}
-<<<<<<< HEAD
 	Snake_Shake_Update(dt);
-=======
 
 	//Timer Interface
 	if (!game_over)
@@ -210,7 +208,6 @@ void Snake_Update(const float dt)
 		sprintf_s(timer, 100, "Time: %.2f", timeCount);
 	}
 	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
->>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 }
 
 void Snake_Render()
@@ -224,13 +221,8 @@ void Snake_Render()
 		float x0 = (GRID_START_X + x * TILE_SIZE) + screen_shake_offset.x;
 		CP_Graphics_DrawLine(x0, (float)GRID_START_Y, x0, (float)GRID_START_Y + GRID_HEIGHT * TILE_SIZE);
 	}
-<<<<<<< HEAD
-	for (int y = 0; y < GRID_WIDTH+1; y++) {
-		float y0 = (GRID_START_Y + y * TILE_SIZE) + screen_shake_offset.y;
-=======
 	for (int y = 0; y < GRID_HEIGHT+1; y++) {
 		float y0 = GRID_START_Y + y * TILE_SIZE;
->>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
 	// render snake
@@ -335,10 +327,6 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	}
 
 	//Score interface
-<<<<<<< HEAD
-	//sprintf_s(scoretxt, 100, "Score: %d", score);
-	//CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
-=======
 	CP_Settings_Fill(RED);
 	switch (snake->Id)
 	{
@@ -359,7 +347,7 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 7));
 		break;
 	}
->>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
+
 }
 
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
