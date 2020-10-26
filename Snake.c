@@ -14,37 +14,65 @@ int to_grow = 0;
 int game_over = 0;
 char* text = "";
 
+int off_grid = 0;
+
+CP_Vector grid_position;
+CP_Vector grid_direction;
+
+CP_Image bg1;
+CP_Image gridbg;
+float screen_center_x = (float)WINDOW_WIDTH / 2.0f;
+float screen_center_y = (float)WINDOW_HEIGHT / 2.0f;
+
 void Snake_Init()
 {
-	CP_System_SetWindowSize(900, 900);
+	CP_System_SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	// add snake of size 1 at (0,0)
+	grid_direction = CP_Vector_Normalize(CP_Vector_Set(0.3f, 0.8f));
+	grid_position = CP_Vector_Set(1.0f, 1.0f);
 	Snake_AddSnake(0, 0);
+
+	// stuffs init
+	bg1 = CP_Image_Load("Assets/bg1.png");
+	gridbg = CP_Image_Load("Assets/gridbg.png");
 }
 
 void Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
 	Snake_UpdateSnake(dt);
-	if (CP_Input_MouseClicked()) {
-		Snake_SpawnFood();
-		Snake_GrowSnake();
-	}
 	if (!food_exists) {
 		Snake_SpawnFood();
 		food_exists = 1;
 	}
+
+	if (game_over) {
+		text = "GAME OVER!";
+		Snake_Restart();
+	}
+
+	if (CP_Input_KeyDown(KEY_O)) {
+		off_grid = 1;
+	}
+
+	// flair
+	Snake_MoveGrid(dt);
 }
 
 void Snake_Render()
 {
+	// render background
+	CP_Image_Draw(bg1, screen_center_x, screen_center_y, WINDOW_WIDTH + 100.0f, WINDOW_HEIGHT + 100.0f, 100);
+	// render grid bg
+	CP_Image_Draw(gridbg, GRID_START_X + (float)(GRID_WIDTH*TILE_SIZE)/2.0f, GRID_START_Y + (float)(GRID_HEIGHT * TILE_SIZE)/2.0f, GRID_WIDTH*TILE_SIZE, GRID_HEIGHT*TILE_SIZE, 100);
 	// render the grid x and y
 	for (int x = 0; x < GRID_WIDTH+1; x++) {
-		int x0 = GRID_START_X + x * TILE_SIZE;
-		CP_Graphics_DrawLine((float)x0, GRID_START_Y, (float)x0, GRID_START_Y + GRID_HEIGHT * TILE_SIZE);
+		float x0 = GRID_START_X + x * TILE_SIZE;
+		CP_Graphics_DrawLine(x0, GRID_START_Y, (float)x0, GRID_START_Y + (float)GRID_HEIGHT * (float)TILE_SIZE);
 	}
-	for (int y = 0; y < GRID_WIDTH+1; y++) {
-		int y0 = GRID_START_X + y * TILE_SIZE;
-		CP_Graphics_DrawLine(GRID_START_X, (float)y0, GRID_START_X + GRID_WIDTH * TILE_SIZE, (float)y0);
+	for (int y = 0; y < GRID_HEIGHT+1; y++) {
+		float y0 = GRID_START_Y + y * TILE_SIZE;
+		CP_Graphics_DrawLine(GRID_START_X, y0, GRID_START_X + (float)GRID_WIDTH * (float)TILE_SIZE, y0);
 	}
 	// render snake
 	Snake_DrawSnake();
@@ -57,15 +85,33 @@ void Snake_Render()
 			}
 		}
 	}
-
-	if (game_over) {
-		text = "GAME OVER!";
-	}
 	CP_Font_DrawText(text, 100.0f, 700.0f);
 }
 
 void Snake_Free() {
 
+}
+
+void Snake_Restart()
+{
+	for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; ++i) {
+		grid[i] = 0;
+	}
+	snake_size = 0;
+	snake_direction = Right;
+	snake_speed_multiplier = 4.0f;
+	snake_speed_timer = 0.0f;
+
+	food_exists = 0;
+	to_grow = 0;
+
+	game_over = 0;
+	text = "";
+
+	grid_position = CP_Vector_Set(1.0f, 1.0f);
+	grid_direction = CP_Vector_Normalize(CP_Vector_Set(0.3f, 0.8f));
+
+	Snake_AddSnake(0, 0);
 }
 
 void Snake_DrawSnake()
@@ -155,8 +201,13 @@ void Snake_AddSnake(const int x, const int y)
 	}
 }
 
+void Snake_UpdateSnakeOffGrid(const float dt)
+{
+}
+
 void Snake_GrowSnake()
 {
+	snake_speed_multiplier += 0.1f;
 	to_grow = 1;
 }
 
@@ -166,12 +217,23 @@ void Snake_SpawnFood()
 	int rand_y;
 	int check = 1;
 	while (check) {
-		rand_x = CP_Random_RangeInt(0, GRID_WIDTH);
-		rand_y = CP_Random_RangeInt(0, GRID_HEIGHT);
+		rand_x = CP_Random_RangeInt(0, GRID_WIDTH-1);
+		rand_y = CP_Random_RangeInt(0, GRID_HEIGHT-1);
 		// if not at a snake position
 		if (grid[rand_y * GRID_WIDTH + rand_x] != 1) {
 			check = 0;
 		}
 	}
 	grid[rand_y * GRID_WIDTH + rand_x] = 2;
+}
+
+void Snake_MoveGrid(const float dt)
+{
+	grid_position = CP_Vector_Add(grid_position, CP_Vector_Scale(grid_direction, GRID_SPEED * dt));
+	if (grid_position.x < 0.0f || grid_position.x > WINDOW_WIDTH - GRID_WIDTH * TILE_SIZE) {
+		grid_direction.x *= -1;
+	}
+	if (grid_position.y < 0.0f || grid_position.y > WINDOW_HEIGHT - GRID_HEIGHT * TILE_SIZE) {
+		grid_direction.y *= -1;
+	}
 }
