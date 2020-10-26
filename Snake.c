@@ -4,7 +4,7 @@
 float TILE_SIZE = 30.f;
 int GRID_START_X = 30;
 int GRID_START_Y = 150;
-int GRID_WIDTH = 16;
+int GRID_WIDTH = 19;
 int GRID_HEIGHT = 16;
 
 int grid[127][127] = { 0 };
@@ -28,9 +28,9 @@ void Level_Init()
 	TILE_SIZE = (((float)CP_System_GetWindowHeight() - (float)GRID_START_Y - 5) / (float)GRID_HEIGHT);
 	// Centers the level
 	GRID_START_X = (int)((float)CP_System_GetWindowWidth() - (GRID_WIDTH * TILE_SIZE)) / 2;
-	for (int i = 0; i < GRID_WIDTH; i++)
+	for (int i = 0; i < GRID_HEIGHT; i++)
 	{
-		for (int j = 0; j < GRID_HEIGHT; j++)
+		for (int j = 0; j < GRID_WIDTH; j++)
 		{
 			grid[i][j] = 0;
 		}
