@@ -15,6 +15,7 @@ int GRID_HEIGHT;
 #define YELLOW CP_Color_Create(255,255,0,255)
 #define DARK_YELLOW CP_Color_Create(155,155,0,255)
 #define GREY CP_Color_Create(100,100,100,255)
+#define BLACK CP_Color_Create(0, 0, 0, 200)
 
 float TILE_SIZE;	// size of each arena tile
 
@@ -63,6 +64,7 @@ struct Snake_Profile Players[4];
 void Add_Player(short id);
 
 void Level_Init();
+char Level_Load(char* filename);
 void Snake_Init();
 void Snake_Update(const float dt);
 void Snake_Render();
@@ -72,9 +74,11 @@ void Snake_Restart();
 void Snake_DrawSnake(struct Snake_Profile *snake);
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
 void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake);
+void Snake_Wrap(struct Snake_Profile *snake);
 
 void Snake_SpawnFood();
 void Snake_SpawnPwrup();
 
 void Reset_Game();
 void Check_For_Food();
+char Check_For_Empty();
