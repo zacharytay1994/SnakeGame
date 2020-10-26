@@ -1,4 +1,5 @@
 #include "Snake.h"
+#include "Particle.h"
 #include <stdio.h>
 
 float TILE_SIZE = 30.f;
@@ -334,6 +335,9 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		// if snake collide with food
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 2) {
 			snake->to_grow = 1;
+			Particle_Burst((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y },
+				10, 30.0f, 90.0f, 120.0f, 240.0f, 30.0f, 120.0f);
+			//Particle_Add((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y }, CP_Vector_Set(1.0f,0.0f), 30.0f);
 			//Check_For_Food();
 		}
 		// game over conditions - hit itself
