@@ -14,6 +14,11 @@ int game_over = 0;
 char text[127] = "";
 struct Snake_Profile Players[4] = { {0} };
 
+char scoreText[100];
+char timer[100];
+float timeCount = 0.f;
+
+
 void Level_Init()
 {
 	CP_System_SetWindowSize(900, 900);
@@ -104,12 +109,14 @@ void Add_Player(short id)
 	snake_new.is_exists = 1;
 	snake_new.Speed_Timer = 0.0f;
 	Snake_GrowSnake(starting_position_x, starting_position_y, &snake_new);
+	snake_new.score = 0;
 	Players[id] = snake_new;
 }
 
 void Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
+	CP_Font_DrawText("Press R to restart", (GRID_WIDTH * 35), (GRID_HEIGHT * 7));
 	for (int i = 0; i < 4; i++)
 	{
 		if (Players[i].is_alive == 1)
@@ -129,6 +136,14 @@ void Snake_Update(const float dt)
 	{
 		Reset_Game();
 	}
+
+	//Timer Interface
+	if (!game_over)
+	{
+		timeCount += (float)dt;
+		sprintf_s(timer, 100, "Time: %.2f", timeCount);
+	}
+	CP_Font_DrawText(timer, (GRID_WIDTH * 2), (GRID_HEIGHT * 3));
 }
 
 void Snake_Render()
@@ -161,6 +176,14 @@ void Snake_Render()
 			}
 		}
 	}
+	for (int y = 0; y < GRID_HEIGHT; y++) {
+		for (int x = 0; x < GRID_WIDTH; x++) {
+			if (grid[y][x] == 3) {
+				CP_Settings_Fill(YELLOW);
+				CP_Graphics_DrawCircle((float)x * TILE_SIZE + (TILE_SIZE/2) + GRID_START_X, (float)y * TILE_SIZE + (TILE_SIZE/2) + GRID_START_Y, TILE_SIZE);
+			}
+		}
+	}
 
 	game_over = 1;
 	for (int i = 0; i < 4; i++)
@@ -176,7 +199,7 @@ void Snake_Render()
 		sprintf_s(text, 127, "GAME OVER!");
 	}
 	//CP_Font_DrawText(text, 100.0f, 700.0f);
-	CP_Settings_TextSize(TILE_SIZE);
+	CP_Settings_TextSize(TILE_SIZE*0.85f);
 	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
 }
 
@@ -195,8 +218,26 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	}
 
 	//Score interface
-	sprintf_s(scoretxt, 100, "Score: %d", score);
-	CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
+	CP_Settings_Fill(RED);
+	switch (snake->Id)
+	{
+	case 0:
+		sprintf_s(scoreText, 100, "P1 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (GRID_WIDTH * 2), (GRID_HEIGHT * 5));
+		break;
+	case 1:
+		sprintf_s(scoreText, 100, "P2 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (GRID_WIDTH * 2), (GRID_HEIGHT * 7));
+		break;
+	case 2:
+		sprintf_s(scoreText, 100, "P3 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (GRID_WIDTH * 17), (GRID_HEIGHT * 5));
+		break;
+	case 3:
+		sprintf_s(scoreText, 100, "P4 Score: %d", snake->score);
+		CP_Font_DrawText(scoreText, (GRID_WIDTH * 17), (GRID_HEIGHT * 7));
+		break;
+	}
 }
 
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
@@ -278,6 +319,7 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 {
 
 	if (snake->Size < GRID_WIDTH * GRID_HEIGHT) {
+		snake->score++;
 		snake->Position[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
 	}
@@ -300,6 +342,25 @@ void Snake_SpawnFood()
 		}
 	}
 	grid[rand_y][rand_x] = 2;
+
+	//Snake_SpawnPwrup();
+}
+
+void Snake_SpawnPwrup()
+{
+	int rand_x;
+	int rand_y;
+	int check = 1;
+	while (check) {
+		rand_x = CP_Random_RangeInt(0, GRID_WIDTH - 1);
+		rand_y = CP_Random_RangeInt(0, GRID_HEIGHT - 1);
+		// if not at a snake position & food position
+		if (grid[rand_y][rand_x] != 1) {
+			if(grid[rand_y][rand_x] != 2)
+			check = 0;
+		}
+	}
+	grid[rand_y][rand_x] = 3;
 }
 
 void Reset_Game()
