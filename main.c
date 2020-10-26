@@ -19,6 +19,7 @@
 // this function will be called once at the beginning of the program
 void game_init(void)
 {
+	CP_System_ShowConsole();
 	// initialize variables and CProcessing settings for this gamestate
 	Level_Init();
 	Snake_Init();
