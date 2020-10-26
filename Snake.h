@@ -70,6 +70,8 @@ void Snake_Update(const float dt);
 void Snake_Render();
 void Snake_Free();
 void Snake_Restart();
+void Snake_Shake();
+void Snake_Shake_Update(const float dt);
 
 void Snake_DrawSnake(struct Snake_Profile *snake);
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
