@@ -10,7 +10,8 @@ float snake_speed_timer = 0.0f;
 
 int food_exists = 0;
 int game_over = 0;
-char* text = "";
+//char* text = "";
+char text[127] = "";
 struct Snake_Profile Players[4] = { {0} };
 
 void Level_Init()
@@ -170,7 +171,8 @@ void Snake_Render()
 	}
 
 	if (game_over) {
-		text = "GAME OVER!";
+		//text = "GAME OVER!";
+		sprintf_s(text, 127, "GAME OVER!");
 	}
 	//CP_Font_DrawText(text, 100.0f, 700.0f);
 	CP_Settings_TextSize(TILE_SIZE);
@@ -244,41 +246,13 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 1) {
 			//game_over = 1;
 			snake->is_alive = 0;
-			switch (snake->Id)
-			{
-			case 0:
-				text = "Player 1 is out!";
-				break;
-			case 1:
-				text = "Player 2 is out!";
-				break;
-			case 2:
-				text = "Player 3 is out!";
-				break;
-			case 3:
-				text = "Player 4 is out!";
-				break;
-			}
+			sprintf_s(text, 127, "Player %d is out!", snake->Id + 1);
 		}
 		// - exceeed bounds
 		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
 			//game_over = 1;
 			snake->is_alive = 0;
-			switch (snake->Id)
-			{
-			case 0:
-				text = "Player 1 is out!";
-				break;
-			case 1:
-				text = "Player 2 is out!";
-				break;
-			case 2:
-				text = "Player 3 is out!";
-				break;
-			case 3:
-				text = "Player 4 is out!";
-				break;
-			}
+			sprintf_s(text, 127, "Player %d is out!", snake->Id + 1);
 		}
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
@@ -327,7 +301,7 @@ void Reset_Game()
 {
 	Level_Init();
 	Snake_Init();
-	text = "";
+	sprintf_s(text, 127, "");
 }
 
 void Check_For_Food()
