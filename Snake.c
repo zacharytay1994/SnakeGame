@@ -148,7 +148,10 @@ void Snake_Update(const float dt)
 
 void Snake_Render()
 {
-	
+	// render background
+	//CP_Image_Draw(bg1, screen_center_x, screen_center_y, WINDOW_WIDTH + 100.0f, WINDOW_HEIGHT + 100.0f, 100);
+	//// render grid bg
+	//CP_Image_Draw(gridbg, GRID_START_X + (float)(GRID_WIDTH*TILE_SIZE)/2.0f, GRID_START_Y + (float)(GRID_HEIGHT * TILE_SIZE)/2.0f, GRID_WIDTH*TILE_SIZE, GRID_HEIGHT*TILE_SIZE, 100);
 	// render the grid x and y
 	for (int x = 0; x < GRID_WIDTH+1; x++) {
 		float x0 = GRID_START_X + x * TILE_SIZE;
