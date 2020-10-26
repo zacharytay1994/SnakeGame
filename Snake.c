@@ -194,7 +194,7 @@ void Snake_Free() {
 
 void Snake_Shake()
 {
-	screen_shake_value = 10.0f;
+	screen_shake_value = 4.0f;
 }
 
 void Snake_Shake_Update(const float dt)
@@ -215,7 +215,7 @@ void Snake_Shake_Update(const float dt)
 		screen_shake_offset.y = 0.0f;
 	}*/
 	if (screen_shake_value > 0.0f) {
-		screen_shake_value = CP_Math_LerpFloat(screen_shake_value, 0.0f, CP_System_GetDt());
+		screen_shake_value = CP_Math_LerpFloat(screen_shake_value, 0.0f, CP_System_GetDt() * 4.0f);
 	}
 }
 
