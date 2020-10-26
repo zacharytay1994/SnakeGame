@@ -26,9 +26,6 @@ extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food
 //extern int snake_size;
 //extern float snake_speed_multiplier;
 
-extern CP_Vector grid_position;
-extern CP_Vector grid_direction;
-
 typedef enum Snake_Direction {
 	Right = 0,
 	Left = 180,
