@@ -191,9 +191,11 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
+    <ClCompile Include="Particle.c" />
     <ClCompile Include="Snake.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="Powerup.h" />
     <ClInclude Include="Snake.h" />
   </ItemGroup>
