@@ -4,8 +4,10 @@
 float TILE_SIZE = 30.f;
 int GRID_START_X = 30;
 int GRID_START_Y = 150;
+int GRID_WIDTH = 16;
+int GRID_HEIGHT = 16;
 
-int grid[GRID_WIDTH][GRID_HEIGHT] = { 0 };
+int grid[127][127] = { 0 };
 float snake_speed_timer = 0.0f;
 
 int food_exists = 0;
@@ -69,7 +71,7 @@ void Add_Player(short id)
 		snake_new.Button_Left = KEY_A;
 		snake_new.Button_Right = KEY_D;
 		snake_new.Button_Down = KEY_S;
-		starting_position_x = GRID_WIDTH -2;
+		starting_position_x = (short)GRID_WIDTH -2;
 		starting_position_y = 1;
 		break;
 	case 2:
@@ -80,8 +82,8 @@ void Add_Player(short id)
 		snake_new.Button_Left = KEY_J;
 		snake_new.Button_Right = KEY_L;
 		snake_new.Button_Down = KEY_K;
-		starting_position_x = GRID_WIDTH - 2;
-		starting_position_y = GRID_HEIGHT - 2;
+		starting_position_x = (short)GRID_WIDTH - 2;
+		starting_position_y = (short)GRID_HEIGHT - 2;
 		break;
 	case 3:
 		snake_new.Direction = Up;
@@ -92,7 +94,7 @@ void Add_Player(short id)
 		snake_new.Button_Right = KEY_KP_6;
 		snake_new.Button_Down = KEY_KP_5;
 		starting_position_x = 1;
-		starting_position_y = GRID_HEIGHT - 2;
+		starting_position_y = (short)GRID_HEIGHT - 2;
 		break;
 	}
 	for (int i = 0; i < GRID_WIDTH * GRID_HEIGHT; i++)
@@ -116,7 +118,7 @@ void Add_Player(short id)
 void Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
-	CP_Font_DrawText("Press R to restart", (GRID_WIDTH * 35), (GRID_HEIGHT * 7));
+	CP_Font_DrawText("Press R to restart", (float)(GRID_WIDTH * 35), (float)(GRID_HEIGHT * 7));
 	for (int i = 0; i < 4; i++)
 	{
 		if (Players[i].is_alive == 1)
@@ -143,7 +145,7 @@ void Snake_Update(const float dt)
 		timeCount += (float)dt;
 		sprintf_s(timer, 100, "Time: %.2f", timeCount);
 	}
-	CP_Font_DrawText(timer, (GRID_WIDTH * 2), (GRID_HEIGHT * 3));
+	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
 }
 
 void Snake_Render()
@@ -157,7 +159,7 @@ void Snake_Render()
 		float x0 = GRID_START_X + x * TILE_SIZE;
 		CP_Graphics_DrawLine(x0, (float)GRID_START_Y, x0, (float)GRID_START_Y + GRID_HEIGHT * TILE_SIZE);
 	}
-	for (int y = 0; y < GRID_WIDTH+1; y++) {
+	for (int y = 0; y < GRID_HEIGHT+1; y++) {
 		float y0 = GRID_START_Y + y * TILE_SIZE;
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
@@ -226,19 +228,19 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	{
 	case 0:
 		sprintf_s(scoreText, 100, "P1 Score: %d", snake->score);
-		CP_Font_DrawText(scoreText, (GRID_WIDTH * 2), (GRID_HEIGHT * 5));
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 5));
 		break;
 	case 1:
 		sprintf_s(scoreText, 100, "P2 Score: %d", snake->score);
-		CP_Font_DrawText(scoreText, (GRID_WIDTH * 2), (GRID_HEIGHT * 7));
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 7));
 		break;
 	case 2:
 		sprintf_s(scoreText, 100, "P3 Score: %d", snake->score);
-		CP_Font_DrawText(scoreText, (GRID_WIDTH * 17), (GRID_HEIGHT * 5));
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 5));
 		break;
 	case 3:
 		sprintf_s(scoreText, 100, "P4 Score: %d", snake->score);
-		CP_Font_DrawText(scoreText, (GRID_WIDTH * 17), (GRID_HEIGHT * 7));
+		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 7));
 		break;
 	}
 }
