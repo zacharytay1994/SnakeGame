@@ -1,47 +1,77 @@
 #pragma once
 #include "CProcessing/inc/cprocessing.h"
 
-#define GRID_WIDTH 5	// size of the arena square
-#define GRID_HEIGHT 10
-#define TILE_SIZE 30	// size of each arena tile
+#define GRID_WIDTH 16	// size of the arena square
+#define GRID_HEIGHT 16
 
-#define WINDOW_WIDTH 900
-#define WINDOW_HEIGHT 900
+#define RED CP_Color_Create(255,0,0,255)
+#define DARK_RED CP_Color_Create(155,0,0,255)
+#define GREEN CP_Color_Create(0,255,0,255)
+#define DARK_GREEN CP_Color_Create(0,155,0,255)
+#define BLUE CP_Color_Create(0,0,255,255)
+#define DARK_BLUE CP_Color_Create(0,0,155,255)
+#define YELLOW CP_Color_Create(255,255,0,255)
+#define DARK_YELLOW CP_Color_Create(155,155,0,255)
+#define GREY CP_Color_Create(100,100,100,255)
 
-#define GRID_START_X grid_position.x
-#define GRID_START_Y grid_position.y
+float TILE_SIZE;	// size of each arena tile
 
-#define SNAKE_SPEED 1
-#define GRID_SPEED 30
+int GRID_START_X;
+int GRID_START_Y;
 
-extern int grid[GRID_WIDTH*GRID_HEIGHT]; // 0 empty, 1 snake, 2 food
-extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
-extern int snake_size;
-extern float snake_speed_multiplier;
+//int SNAKE_SPEED;
+
+extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food
+//extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
+//extern int snake_size;
+//extern float snake_speed_multiplier;
 
 extern CP_Vector grid_position;
 extern CP_Vector grid_direction;
 
 typedef enum Snake_Direction {
-	Right,
-	Left,
-	Up,
-	Down
+	Right = 0,
+	Left = 180,
+	Up = 90,
+	Down = 270
 } Snake_Direction;
-extern int snake_direction;
+//extern int snake_direction;
 
+struct Snake_Profile
+{
+	short Id;
+	int Speed;
+	int Size;
+	float Speed_Multiplier;
+	float Speed_Timer;
+	CP_Vector Position[GRID_WIDTH * GRID_HEIGHT];
+	Snake_Direction PreviousDirection;
+	Snake_Direction Direction;
+	char to_grow;
+	char is_alive;
+	char is_exists;
+	CP_Color HeadColor;
+	CP_Color BodyColor;
+	CP_KEY Button_Up;
+	CP_KEY Button_Left;
+	CP_KEY Button_Right;
+	CP_KEY Button_Down;
+};
+struct Snake_Profile Players[4];
+void Add_Player(short id);
+
+void Level_Init();
 void Snake_Init();
 void Snake_Update(const float dt);
 void Snake_Render();
 void Snake_Free();
 void Snake_Restart();
 
-void Snake_DrawSnake();
-void Snake_UpdateSnake(const float dt);
-void Snake_AddSnake(const int x, const int y);
-void Snake_UpdateSnakeOffGrid(const float dt);
+void Snake_DrawSnake(struct Snake_Profile *snake);
+void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
+void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake);
 
-void Snake_GrowSnake();
 void Snake_SpawnFood();
 
-void Snake_MoveGrid(const float dt);
+void Reset_Game();
+void Check_For_Food();
