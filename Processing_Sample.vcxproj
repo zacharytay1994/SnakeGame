@@ -192,11 +192,9 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
   <ItemGroup>
     <ClCompile Include="main.c" />
     <ClCompile Include="Snake.c" />
-    <ClCompile Include="Snake_Noel.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Snake.h" />
-    <ClInclude Include="Snake_Noel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

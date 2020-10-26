@@ -9,31 +9,19 @@
 // documentation link:
 // https://inside.digipen.edu/main/GSDP:GAM100/CProcessing
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "cprocessing.h"
-#define ISNOEL
-#ifdef ISNOEL
-#include "Snake_Noel.h"
-#else
 #include "Snake.h"
-#endif // ISNOEL
-
-
-
 
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
 void game_init(void)
 {
 	// initialize variables and CProcessing settings for this gamestate
-#ifdef ISNOEL
-	Level_Init_Noel();
-	Snake_Init_Noel();
-#else
+	Level_Init();
 	Snake_Init();
-#endif
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the update function
@@ -41,21 +29,8 @@ void game_init(void)
 void game_update(void)
 {
 	// check input, update simulation, render etc.
-#ifdef ISNOEL
-	Snake_Update_Noel(CP_System_GetDt());
-	Level_Update_Noel();
-	Level_Render_Noel();
-	Snake_Render_Noel();
-#else
 	Snake_Update(CP_System_GetDt());
 	Snake_Render();
-#endif // ISNOEL
-
-	//Snake_Update(CP_System_GetDt());
-	//Level_Update_Noel();
-	//Level_Render_Noel();
-	//Snake_Update_Noel(CP_System_GetDt());
-	//Snake_Render();
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the exit function
@@ -63,11 +38,7 @@ void game_update(void)
 void game_exit(void)
 {
 	// shut down the gamestate and cleanup any dynamic memory
-#ifndef ISNOEL
 	Snake_Free();
-
-#endif // !ISNOEL
-
 }
 
 // main() the starting point for the program
