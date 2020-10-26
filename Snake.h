@@ -1,5 +1,7 @@
 #pragma once
 #include "CProcessing/inc/cprocessing.h"
+#include <stdio.h>
+#include "Powerup.h"
 
 #define GRID_WIDTH 16	// size of the arena square
 #define GRID_HEIGHT 16
@@ -20,8 +22,9 @@ int GRID_START_X;
 int GRID_START_Y;
 
 //int SNAKE_SPEED;
+FILE* highscore;
 
-extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food
+extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food, 3 pwrup
 //extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
 //extern int snake_size;
 //extern float snake_speed_multiplier;
@@ -53,6 +56,8 @@ struct Snake_Profile
 	CP_KEY Button_Left;
 	CP_KEY Button_Right;
 	CP_KEY Button_Down;
+
+	int score;
 };
 struct Snake_Profile Players[4];
 void Add_Player(short id);
@@ -69,6 +74,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
 void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake);
 
 void Snake_SpawnFood();
+void Snake_SpawnPwrup();
 
 void Reset_Game();
 void Check_For_Food();
