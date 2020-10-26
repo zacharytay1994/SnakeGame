@@ -22,10 +22,12 @@ char scoreText[100];
 char timer[100];
 float timeCount = 0.f;
 
+CP_Image snake_background;
 
 void Level_Init()
 {
 	screen_shake_offset = CP_Vector_Set(0.0f, 0.0f);
+	snake_background = CP_Image_Load("Assets/snakebg.png");
 	CP_System_SetWindowSize(900, 900);
 	// Adjust tile size according to level size
 	TILE_SIZE = (((float)CP_System_GetWindowHeight() - (float)GRID_START_Y - 5) / (float)GRID_HEIGHT);
@@ -107,7 +109,7 @@ void Add_Player(short id)
 	}
 	snake_new.Id = id;
 	snake_new.Size = 0;
-	snake_new.Speed_Multiplier = 4.0f;
+	snake_new.Speed_Multiplier = 0.25f;
 	snake_new.Speed = 1;
 	snake_new.to_grow = 0;
 	snake_new.is_alive = 1;
@@ -141,9 +143,8 @@ void Snake_Update(const float dt)
 	{
 		Reset_Game();
 	}
-<<<<<<< HEAD
 	Snake_Shake_Update(dt);
-=======
+
 
 	//Timer Interface
 	if (!game_over)
@@ -152,13 +153,16 @@ void Snake_Update(const float dt)
 		sprintf_s(timer, 100, "Time: %.2f", timeCount);
 	}
 	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
->>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 }
 
 void Snake_Render()
 {
+	float window_width = (float)CP_System_GetWindowWidth();
+	float window_height = (float)CP_System_GetWindowHeight();
+	float screen_center_x = window_width / 2.0f;
+	float screen_center_y = window_height / 2.0f;
 	// render background
-	//CP_Image_Draw(bg1, screen_center_x, screen_center_y, WINDOW_WIDTH + 100.0f, WINDOW_HEIGHT + 100.0f, 100);
+	CP_Image_Draw(snake_background, screen_center_x, screen_center_y, window_width + 100.0f, window_height + 100.0f, 100);
 	//// render grid bg
 	//CP_Image_Draw(gridbg, GRID_START_X + (float)(GRID_WIDTH*TILE_SIZE)/2.0f, GRID_START_Y + (float)(GRID_HEIGHT * TILE_SIZE)/2.0f, GRID_WIDTH*TILE_SIZE, GRID_HEIGHT*TILE_SIZE, 100);
 	// render the grid x and y
@@ -166,13 +170,8 @@ void Snake_Render()
 		float x0 = (GRID_START_X + x * TILE_SIZE) + screen_shake_offset.x;
 		CP_Graphics_DrawLine(x0, (float)GRID_START_Y, x0, (float)GRID_START_Y + GRID_HEIGHT * TILE_SIZE);
 	}
-<<<<<<< HEAD
-	for (int y = 0; y < GRID_WIDTH+1; y++) {
-		float y0 = (GRID_START_Y + y * TILE_SIZE) + screen_shake_offset.y;
-=======
 	for (int y = 0; y < GRID_HEIGHT+1; y++) {
 		float y0 = GRID_START_Y + y * TILE_SIZE;
->>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
 	// render snake
@@ -226,7 +225,7 @@ void Snake_Free() {
 
 void Snake_Shake()
 {
-	screen_shake_value = 4.0f;
+	screen_shake_value = 0.5f;
 }
 
 void Snake_Shake_Update(const float dt)
@@ -258,14 +257,15 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		if (i == 0)
 		{ CP_Settings_Fill(snake->HeadColor); }
 		else { CP_Settings_Fill(snake->BodyColor); }
-		CP_Graphics_DrawRect((snake->Position[i].x * TILE_SIZE + GRID_START_X) + screen_shake_offset.x, (snake->Position[i].y * TILE_SIZE + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE, TILE_SIZE);
+		float ratio_moved = snake->Speed_Timer / (float)(snake->Speed * snake->Speed_Multiplier);
+		snake->PositionFollow[i].x = CP_Math_LerpFloat(snake->PositionFollow[i].x, snake->Position[i].x, ratio_moved);
+		snake->PositionFollow[i].y = CP_Math_LerpFloat(snake->PositionFollow[i].y, snake->Position[i].y, ratio_moved);
+		CP_Graphics_DrawRect((snake->PositionFollow[i].x * TILE_SIZE + GRID_START_X) + screen_shake_offset.x, (snake->PositionFollow[i].y * TILE_SIZE + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE, TILE_SIZE);
 	}
 
 	//Score interface
-<<<<<<< HEAD
 	//sprintf_s(scoretxt, 100, "Score: %d", score);
 	//CP_Font_DrawText(scoretxt, (GRID_WIDTH * 17), (GRID_HEIGHT * 35));
-=======
 	CP_Settings_Fill(RED);
 	switch (snake->Id)
 	{
@@ -286,7 +286,6 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 7));
 		break;
 	}
->>>>>>> ffb62caa57d7a8e15a9789e7398767573bace814
 }
 
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
@@ -307,7 +306,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 	// UPDATE SNAKE POSITION
 	// each cell in snake that is not the head will go to the cell in front, head will go in direction of snake_direction
 	// check snake speed and move snake
-	if (snake->Speed_Timer < (float)snake->Speed / snake->Speed_Multiplier) {
+	if (snake->Speed_Timer < (float)snake->Speed * snake->Speed_Multiplier) {
 		snake->Speed_Timer += dt;
 	}
 	else { // if timer up move snake once
@@ -373,7 +372,8 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 		snake->score++;
 		//highscore = fopen("highscore.txt", "w");
 		//fscanf(highscore, "%c", snake->score);
-		snake->Position[snake->Size++] = (CP_Vector){ (float)x,(float)y };
+		snake->Position[snake->Size] = (CP_Vector){ (float)x,(float)y };
+		snake->PositionFollow[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
 	}
 	else {
