@@ -291,7 +291,7 @@ void Snake_Free() {
 
 void Snake_Shake()
 {
-	screen_shake_value = 10.0f;
+	screen_shake_value = 1.0f;
 }
 
 void Snake_Shake_Update(const float dt)
