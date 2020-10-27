@@ -46,6 +46,7 @@ struct Snake_Profile
 	float Speed_Multiplier;
 	float Speed_Timer;
 	CP_Vector Position[127 * 127];
+	CP_Vector PositionFollow[127 * 127];
 	Snake_Direction PreviousDirection;
 	Snake_Direction Direction;
 	char to_grow;
