@@ -1,4 +1,5 @@
 #include "Snake.h"
+#include "Particle.h"
 #include <stdio.h>
 
 float TILE_SIZE = 30.f;
@@ -22,10 +23,12 @@ char scoreText[100];
 char timer[100];
 float timeCount = 0.f;
 
+CP_Image snake_background;
 
 void Level_Init()
 {
 	screen_shake_offset = CP_Vector_Set(0.0f, 0.0f);
+	snake_background = CP_Image_Load("Assets/snakebg.png");
 	CP_System_SetWindowSize(900, 900);
 	if (!Level_Load("TestLevel.txt"))
 	{
@@ -165,7 +168,7 @@ void Add_Player(short id)
 	}
 	snake_new.Id = id;
 	snake_new.Size = 0;
-	snake_new.Speed_Multiplier = 4.0f;
+	snake_new.Speed_Multiplier = 0.25f;
 	snake_new.Speed = 1;
 	snake_new.to_grow = 0;
 	snake_new.is_alive = 1;
@@ -212,8 +215,12 @@ void Snake_Update(const float dt)
 
 void Snake_Render()
 {
+	float window_width = (float)CP_System_GetWindowWidth();
+	float window_height = (float)CP_System_GetWindowHeight();
+	float screen_center_x = window_width / 2.0f;
+	float screen_center_y = window_height / 2.0f;
 	// render background
-	//CP_Image_Draw(bg1, screen_center_x, screen_center_y, WINDOW_WIDTH + 100.0f, WINDOW_HEIGHT + 100.0f, 100);
+	CP_Image_Draw(snake_background, screen_center_x, screen_center_y, window_width + 100.0f, window_height + 100.0f, 100);
 	//// render grid bg
 	//CP_Image_Draw(gridbg, GRID_START_X + (float)(GRID_WIDTH*TILE_SIZE)/2.0f, GRID_START_Y + (float)(GRID_HEIGHT * TILE_SIZE)/2.0f, GRID_WIDTH*TILE_SIZE, GRID_HEIGHT*TILE_SIZE, 100);
 	// render the grid x and y
@@ -312,7 +319,7 @@ void Snake_Shake_Update(const float dt)
 		screen_shake_offset.y = 0.0f;
 	}*/
 	if (screen_shake_value > 0.0f) {
-		screen_shake_value = CP_Math_LerpFloat(screen_shake_value, 0.0f, CP_System_GetDt());
+		screen_shake_value = CP_Math_LerpFloat(screen_shake_value, 0.0f, CP_System_GetDt() * 4.0f);
 	}
 }
 
@@ -323,7 +330,10 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		if (i == 0)
 		{ CP_Settings_Fill(snake->HeadColor); }
 		else { CP_Settings_Fill(snake->BodyColor); }
-		CP_Graphics_DrawRect((snake->Position[i].x * TILE_SIZE + GRID_START_X) + screen_shake_offset.x, (snake->Position[i].y * TILE_SIZE + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE, TILE_SIZE);
+		float ratio_moved = snake->Speed_Timer / (float)(snake->Speed * snake->Speed_Multiplier);
+		snake->PositionFollow[i].x = CP_Math_LerpFloat(snake->PositionFollow[i].x, snake->Position[i].x, ratio_moved);
+		snake->PositionFollow[i].y = CP_Math_LerpFloat(snake->PositionFollow[i].y, snake->Position[i].y, ratio_moved);
+		CP_Graphics_DrawRect((snake->PositionFollow[i].x * TILE_SIZE + GRID_START_X) + screen_shake_offset.x, (snake->PositionFollow[i].y * TILE_SIZE + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE, TILE_SIZE);
 	}
 
 	//Score interface
@@ -347,7 +357,6 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		CP_Font_DrawText(scoreText, (float)(GRID_WIDTH * 17), (float)(GRID_HEIGHT * 7));
 		break;
 	}
-
 }
 
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
@@ -368,7 +377,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 	// UPDATE SNAKE POSITION
 	// each cell in snake that is not the head will go to the cell in front, head will go in direction of snake_direction
 	// check snake speed and move snake
-	if (snake->Speed_Timer < (float)snake->Speed / snake->Speed_Multiplier) {
+	if (snake->Speed_Timer < (float)snake->Speed * snake->Speed_Multiplier) {
 		snake->Speed_Timer += dt;
 	}
 	else { // if timer up move snake once
@@ -396,6 +405,9 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 		// if snake collide with food
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 2) {
 			snake->to_grow = 1;
+			Particle_Burst((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y },
+				10, 30.0f, 90.0f, 120.0f, 240.0f, 30.0f, 120.0f);
+			//Particle_Add((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y }, CP_Vector_Set(1.0f,0.0f), 30.0f);
 			//Check_For_Food();
 		}
 		// game over conditions - hit itself
@@ -461,7 +473,8 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 		snake->score++;
 		//highscore = fopen("highscore.txt", "w");
 		//fscanf(highscore, "%c", snake->score);
-		snake->Position[snake->Size++] = (CP_Vector){ (float)x,(float)y };
+		snake->Position[snake->Size] = (CP_Vector){ (float)x,(float)y };
+		snake->PositionFollow[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
 	}
 	else {
