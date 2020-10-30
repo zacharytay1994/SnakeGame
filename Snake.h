@@ -6,6 +6,7 @@
 #define GRID_WIDTH 16	// size of the arena square
 #define GRID_HEIGHT 16
 
+// PLAYER COLORS
 #define RED CP_Color_Create(255,0,0,255)
 #define DARK_RED CP_Color_Create(155,0,0,255)
 #define GREEN CP_Color_Create(0,255,0,255)
@@ -16,13 +17,16 @@
 #define DARK_YELLOW CP_Color_Create(155,155,0,255)
 #define GREY CP_Color_Create(100,100,100,255)
 
+//DEFAULT COLORS
+#define BLACK CP_Color_Create(0,0,0,255)
+#define WHITE CP_Color_Create(255,255,255,255)
+
 float TILE_SIZE;	// size of each arena tile
 
 int GRID_START_X;
 int GRID_START_Y;
 
 //int SNAKE_SPEED;
-FILE* highscore;
 
 extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food, 3 pwrup
 //extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
@@ -58,6 +62,7 @@ struct Snake_Profile
 	CP_KEY Button_Down;
 
 	int score;
+	
 };
 struct Snake_Profile Players[4];
 void Add_Player(short id);
