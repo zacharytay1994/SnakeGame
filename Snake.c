@@ -1,5 +1,6 @@
 #include "Snake.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 float TILE_SIZE = 30.f;
 int GRID_START_X = 30;
@@ -15,6 +16,10 @@ char text[127] = "";
 struct Snake_Profile Players[4] = { {0} };
 
 char scoreText[100];
+
+int highscore;
+int updated_highscore;
+char highscore_text[100];
 char timer[100];
 float timeCount = 0.f;
 
@@ -41,6 +46,12 @@ void Snake_Init()
 	Add_Player(1);
 	Add_Player(2);
 	Add_Player(3);
+
+	//Init Highscore
+	FILE* highscore_read;
+	fopen_s(&highscore_read, "highscore.txt", "r");
+	fscanf_s(highscore_read, "%d", &highscore);
+	fclose(highscore_read);
 }
 
 void Add_Player(short id)
@@ -200,6 +211,8 @@ void Snake_Render()
 	if (game_over) {
 		//text = "GAME OVER!";
 		sprintf_s(text, 127, "GAME OVER!");
+
+		
 	}
 	//CP_Font_DrawText(text, 100.0f, 700.0f);
 	CP_Settings_TextSize(TILE_SIZE*0.85f);
@@ -210,12 +223,14 @@ void Snake_Free() {
 
 }
 
-void Snake_DrawSnake(struct Snake_Profile *snake)
+void Snake_DrawSnake(struct Snake_Profile* snake)
 {
 	// for each cell in snake, draw a square there of tile size
 	for (int i = 0; i < snake->Size; i++) {
 		if (i == 0)
-		{ CP_Settings_Fill(snake->HeadColor); }
+		{
+			CP_Settings_Fill(snake->HeadColor);
+		}
 		else { CP_Settings_Fill(snake->BodyColor); }
 		CP_Graphics_DrawRect(snake->Position[i].x * TILE_SIZE + GRID_START_X, snake->Position[i].y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
 	}
@@ -240,6 +255,42 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		sprintf_s(scoreText, 100, "P4 Score: %d", snake->score);
 		CP_Font_DrawText(scoreText, (GRID_WIDTH * 17), (GRID_HEIGHT * 7));
 		break;
+	}
+
+	//Init Highscore
+	FILE* highscore_read;
+	fopen_s(&highscore_read, "highscore.txt", "r");
+	fscanf_s(highscore_read, "%d", &updated_highscore);
+	fclose(highscore_read);
+
+	//Update Highscore data 
+	if (game_over)
+	{
+		if (snake->score > highscore)
+		{
+			//Saving new Highscore
+			FILE* highscore_write;
+			fopen_s(&highscore_write, "highscore.txt", "w");
+			fprintf_s(highscore_write, "%d", snake->score);
+			fclose(highscore_write);
+
+			//Highscore Notif
+			CP_Settings_Fill(BLUE);
+			char new_scoreNotif[100];
+			sprintf_s(new_scoreNotif, 100, "NEW HIGHSCORE!");
+			CP_Font_DrawText(new_scoreNotif, (GRID_WIDTH * 37), (GRID_HEIGHT * 3));
+			//Update Highscore display
+			CP_Settings_Fill(BLACK);
+			sprintf_s(highscore_text, 100, "Highscore: %d", snake->score);
+			CP_Font_DrawText(highscore_text, (GRID_WIDTH * 37), (GRID_HEIGHT * 5));
+		}
+	}
+	else
+	{
+		//Highscore Display
+		CP_Settings_Fill(BLACK);
+		sprintf_s(highscore_text, 100, "Highscore: %d", updated_highscore);
+		CP_Font_DrawText(highscore_text, (GRID_WIDTH * 37), (GRID_HEIGHT * 5));
 	}
 }
 
@@ -316,6 +367,8 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 
 		Check_For_Food();
 	}
+
+	
 }
 
 void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
@@ -323,8 +376,7 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 
 	if (snake->Size < GRID_WIDTH * GRID_HEIGHT) {
 		snake->score++;
-		//highscore = fopen("highscore.txt", "w");
-		//fscanf(highscore, "%c", snake->score);
+		
 		snake->Position[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
 	}
