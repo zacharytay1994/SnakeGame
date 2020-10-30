@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include "Powerup.h"
 
-#define GRID_WIDTH 16	// size of the arena square
-#define GRID_HEIGHT 16
+int GRID_WIDTH;	// size of the arena square
+int GRID_HEIGHT;
 
 // PLAYER COLORS
 #define RED CP_Color_Create(255,0,0,255)
@@ -16,9 +16,9 @@
 #define YELLOW CP_Color_Create(255,255,0,255)
 #define DARK_YELLOW CP_Color_Create(155,155,0,255)
 #define GREY CP_Color_Create(100,100,100,255)
+#define BLACK CP_Color_Create(0, 0, 0, 200)
 
 //DEFAULT COLORS
-#define BLACK CP_Color_Create(0,0,0,255)
 #define WHITE CP_Color_Create(255,255,255,255)
 
 float TILE_SIZE;	// size of each arena tile
@@ -28,7 +28,7 @@ int GRID_START_Y;
 
 //int SNAKE_SPEED;
 
-extern int grid[GRID_WIDTH][GRID_HEIGHT]; // 0 empty, 1 snake, 2 food, 3 pwrup
+extern int grid[127][127]; // 0 empty, 1 snake, 2 food, 3 pwrup
 //extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
 //extern int snake_size;
 //extern float snake_speed_multiplier;
@@ -48,7 +48,8 @@ struct Snake_Profile
 	int Size;
 	float Speed_Multiplier;
 	float Speed_Timer;
-	CP_Vector Position[GRID_WIDTH * GRID_HEIGHT];
+	CP_Vector Position[127 * 127];
+	CP_Vector PositionFollow[127 * 127];
 	Snake_Direction PreviousDirection;
 	Snake_Direction Direction;
 	char to_grow;
@@ -68,18 +69,23 @@ struct Snake_Profile Players[4];
 void Add_Player(short id);
 
 void Level_Init();
+char Level_Load(char* filename);
 void Snake_Init();
 void Snake_Update(const float dt);
 void Snake_Render();
 void Snake_Free();
 void Snake_Restart();
+void Snake_Shake();
+void Snake_Shake_Update(const float dt);
 
 void Snake_DrawSnake(struct Snake_Profile *snake);
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
 void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake);
+void Snake_Wrap(struct Snake_Profile *snake);
 
 void Snake_SpawnFood();
 void Snake_SpawnPwrup();
 
 void Reset_Game();
 void Check_For_Food();
+char Check_For_Empty();
