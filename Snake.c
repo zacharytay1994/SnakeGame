@@ -392,11 +392,11 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 			CP_Settings_Fill(BLUE);
 			char new_scoreNotif[100];
 			sprintf_s(new_scoreNotif, 100, "NEW HIGHSCORE!");
-			CP_Font_DrawText(new_scoreNotif, (GRID_WIDTH * 37), (GRID_HEIGHT * 3));
+			CP_Font_DrawText(new_scoreNotif, (float)(GRID_WIDTH * 37), (float)(GRID_HEIGHT * 3));
 			//Update Highscore display
 			CP_Settings_Fill(BLACK);
 			sprintf_s(highscore_text, 100, "Highscore: %d", snake->score);
-			CP_Font_DrawText(highscore_text, (GRID_WIDTH * 37), (GRID_HEIGHT * 5));
+			CP_Font_DrawText(highscore_text, (float)(GRID_WIDTH * 37), (float)(GRID_HEIGHT * 5));
 		}
 	}
 	else
@@ -404,7 +404,7 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		//Highscore Display
 		CP_Settings_Fill(BLACK);
 		sprintf_s(highscore_text, 100, "Highscore: %d", updated_highscore);
-		CP_Font_DrawText(highscore_text, (GRID_WIDTH * 37), (GRID_HEIGHT * 5));
+		CP_Font_DrawText(highscore_text, (float)(GRID_WIDTH * 37), (float)(GRID_HEIGHT * 5));
 	}
 }
 
