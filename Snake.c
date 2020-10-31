@@ -728,6 +728,11 @@ void Snake_SpawnPwrup(int PowerUpID)
 	grid[rand_y][rand_x] = PowerUpID;
 }
 
+/*
+ @brief Sets up the highscore leaderboard
+ @param void
+ @return void
+*/
 void GameOver_SetHighScore()
 {
 	int leading_player = 0;
@@ -776,6 +781,11 @@ void GameOver_SetHighScore()
 	sprintf_s(leaderboards_text4, 100, "Player %d\t\t\t\tScore: %3d", Players_Highscore_List[3] + 1, Players[Players_Highscore_List[3]].score);
 }
 
+/*
+ @brief Renders the leaderboard
+ @param void
+ @return void
+*/
 void GameOver_Render()
 {
 	switch (Players_Highscore_List[0])
