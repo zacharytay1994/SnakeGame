@@ -275,6 +275,12 @@ void Snake_Render()
 					CP_Graphics_DrawRect((float)x * TILE_SIZE + GRID_START_X, (float)y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
 					break;
 				}
+				case 5:
+				{
+					CP_Settings_Fill(LIGHT_BLUE);
+					CP_Graphics_DrawRect((float)x * TILE_SIZE + GRID_START_X, (float)y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
+					break;
+				}
 			}
 		}
 	}
@@ -435,11 +441,12 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 	// UPDATE SNAKE POSITION
 	// each cell in snake that is not the head will go to the cell in front, head will go in direction of snake_direction
 	// check snake speed and move snake
-	if (snake->Speed_Timer < (float)snake->Speed * snake->Speed_Multiplier) {
+	if (snake->Speed_Timer < snake->Speed * snake->Speed_Multiplier) {
 		snake->Speed_Timer += dt;
 	}
 	else { // if timer up move snake once
 		snake->Speed_Timer = 0.0f;
+		snake->Speed = 1.0f;
 		CP_Vector last_position = snake->Position[snake->Size - 1];
 		// move snek
 		for (int i = snake->Size - 1; i > 0; i--) {
@@ -468,11 +475,29 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			//Particle_Add((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y }, CP_Vector_Set(1.0f,0.0f), 30.0f);
 			//Check_For_Food();
 		}
-		// game over conditions - hit itself
-		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 1) {
-			//game_over = 1;
-			snake->is_alive = 0;
-			sprintf_s(text, 127, "Player %d died by snake!", snake->Id + 1);
+		
+		switch(grid[(int)snake->Position[0].y][(int)snake->Position[0].x])
+		{
+			case 1:
+			{
+				// game over conditions - hit itself
+				snake->is_alive = 0;
+				sprintf_s(text, 127, "Player %d died by snake!", snake->Id + 1);
+				break;
+			}
+			case 4:
+			{
+				// game over conditions - hit wall
+				snake->is_alive = 0;
+				sprintf_s(text, 127, "Player %d died by wall!", snake->Id + 1);
+				break;
+			}
+			case 5:
+			{
+				// debuff - slow down - hit water
+				snake->Speed = 2.0f;
+				break;
+			}
 		}
 		// - exceeed bounds
 		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
@@ -480,12 +505,6 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			//snake->is_alive = 0;
 			//sprintf_s(text, 127, "Player %d died by border!", snake->Id + 1);
 			Snake_Wrap(snake);
-		}
-		// game over conditions - hit wall
-		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 4) {
-			//game_over = 1;
-			snake->is_alive = 0;
-			sprintf_s(text, 127, "Player %d died by wall!", snake->Id + 1);
 		}
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
