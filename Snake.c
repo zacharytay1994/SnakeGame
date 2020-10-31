@@ -606,6 +606,7 @@ void Reset_Game()
 	Level_Init();
 	Snake_Init();
 	sprintf_s(text, 127, "");
+	timeCount = 0.0f;
 }
 
 void Check_For_Food()
