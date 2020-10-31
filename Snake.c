@@ -29,6 +29,11 @@ float timeCount = 0.f;
 
 CP_Image snake_background;
 
+/*!
+ @brief Generates a basic level
+ @param void
+ @return void
+________________________________________________________________________*/
 void Level_Init()
 {
 	screen_shake_offset = CP_Vector_Set(0.0f, 0.0f);
@@ -59,6 +64,11 @@ void Level_Init()
 	GRID_START_X = (int)((float)CP_System_GetWindowWidth() - (GRID_WIDTH * TILE_SIZE)) / 2;
 }
 
+/*
+ @brief Loads a level from text file
+ @param void
+ @return 1 if load successful, 0 if load failed
+ */
 char Level_Load(char* filename)
 {
 	FILE* customlevel;
@@ -105,6 +115,11 @@ char Level_Load(char* filename)
 	return 0;
 }
 
+/*
+ @brief Initializes snakes and highscore
+ @param void
+ @return void
+*/
 void Snake_Init()
 {
 	Add_Player(0);
@@ -119,6 +134,11 @@ void Snake_Init()
 	fclose(highscore_read);
 }
 
+/*
+ @brief Generates a player profile
+ @param id - Depending on the ID, generate a player with specific colour and button controls
+ @return void
+*/
 void Add_Player(short id)
 {
 	struct Snake_Profile snake_new;
@@ -189,6 +209,11 @@ void Add_Player(short id)
 	Players[id] = snake_new;
 }
 
+/*
+ @brief Updates game
+ @param dt - DeltaTime
+ @return void
+*/
 void Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
@@ -227,6 +252,11 @@ void Snake_Update(const float dt)
 	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
 }
 
+/*
+ @brief Renders all items in the game
+ @param void
+ @return void
+*/
 void Snake_Render()
 {
 	float window_width = (float)CP_System_GetWindowWidth();
@@ -316,11 +346,21 @@ void Snake_Free() {
 
 }
 
+/*
+ @brief Creates a screen shake effect
+ @param void
+ @return void
+*/
 void Snake_Shake()
 {
 	screen_shake_value = 1.0f;
 }
 
+/*
+ @brief Update for screen shake effect
+ @param dt - DeltaTime
+ @return void
+*/
 void Snake_Shake_Update(const float dt)
 {
 	screen_shake_offset.x = CP_Random_RangeFloat(-5.0f * screen_shake_value, 5.0f * screen_shake_value);
@@ -331,6 +371,11 @@ void Snake_Shake_Update(const float dt)
 	}
 }
 
+/*
+ @brief Draws the snake and their data
+ @param snake - the snake profile to draw
+ @return void
+*/
 void Snake_DrawSnake(struct Snake_Profile *snake)
 {
 	// for each cell in snake, draw a square there of tile size
@@ -413,6 +458,11 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	}
 }
 
+/*
+ @brief Updates the snake
+ @param snake - the snake profile to update
+ @return void
+*/
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 {
 	// SNAKE INPUT
@@ -541,6 +591,11 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 	
 }
 
+/*
+ @brief Wraps the snake around the map if it exits the border
+ @param snake - the snake profile to wrap
+ @return void
+*/
 void Snake_Wrap(struct Snake_Profile* snake)
 {
 	if ((int)snake->Position[0].y < 0)
@@ -561,6 +616,12 @@ void Snake_Wrap(struct Snake_Profile* snake)
 	}
 }
 
+/*
+ @brief Grows the snake
+ @param x, y  - position of the snake to grow at
+		snake - the snake profile to grow
+ @return void
+*/
 void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 {
 
@@ -575,6 +636,11 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 	}
 }
 
+/*
+ @brief Spawns the food for the game
+ @param void
+ @return void
+*/
 void Snake_SpawnFood()
 {
 	if (!Check_For_Empty())
@@ -596,6 +662,11 @@ void Snake_SpawnFood()
 	grid[rand_y][rand_x] = 2;
 }
 
+/*
+ @brief Spawns the powerup for the game
+ @param id - Depending on the ID, spawn that specific powerup
+ @return void
+*/
 void Snake_SpawnPwrup(int PowerUpID)
 {
 	int rand_x;
@@ -612,6 +683,11 @@ void Snake_SpawnPwrup(int PowerUpID)
 	grid[rand_y][rand_x] = PowerUpID;
 }
 
+/*
+ @brief Resets the game
+ @param void
+ @return void
+*/
 void Reset_Game()
 {
 	Level_Init();
@@ -620,6 +696,11 @@ void Reset_Game()
 	timeCount = 0.0f;
 }
 
+/*
+ @brief Checks if food already exists in the map
+ @param void
+ @return void
+*/
 void Check_For_Food()
 {
 	for (int i = 0; i < GRID_HEIGHT; i++)
@@ -637,6 +718,11 @@ void Check_For_Food()
 	return;
 }
 
+/*
+ @brief Checks if an empty spot exists in the map
+ @param void
+ @return 1 if an empty spot exists, 0 if there are no empty spots
+*/
 char Check_For_Empty()
 {
 	for (int i = 0; i < GRID_HEIGHT; i++)
@@ -652,6 +738,11 @@ char Check_For_Empty()
 	return 0;
 }
 
+/*
+ @brief Gets the number of alive players (players playing and not dead)
+ @param void
+ @return number of alive players
+*/
 int Get_NumberOf_Alive_Players()
 {
 	int counter = 0;
@@ -665,6 +756,11 @@ int Get_NumberOf_Alive_Players()
 	return counter;
 }
 
+/*
+ @brief Gets the number of existing players (players playing, may or may not be dead)
+ @param void
+ @return number of existing players
+*/
 int Get_NumberOf_Existing_Players()
 {
 	int counter = 0;
