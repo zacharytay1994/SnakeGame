@@ -207,6 +207,10 @@ void Snake_Update(const float dt)
 	}
 	if (!food_exists) {
 		Snake_SpawnFood();
+		if (Get_NumberOf_Alive_Players() > 1 && rand() % 4 == 0)
+		{
+			Snake_SpawnPwrup(6);
+		}
 		food_exists = 1;
 	}
 	if (CP_Input_KeyDown(KEY_R))
@@ -281,17 +285,20 @@ void Snake_Render()
 					CP_Graphics_DrawRect((float)x * TILE_SIZE + GRID_START_X, (float)y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
 					break;
 				}
+				case 6:
+				{
+					CP_Settings_Fill(LIGHT_BLUE);
+					CP_Graphics_DrawCircle((float)x * TILE_SIZE + (TILE_SIZE / 2) + GRID_START_X, (float)y * TILE_SIZE + (TILE_SIZE / 2) + GRID_START_Y, TILE_SIZE);
+					break;
+				}
 			}
 		}
 	}
 
 	game_over = 1;
-	for (int i = 0; i < 4; i++)
+	if (Get_NumberOf_Alive_Players())
 	{
-		if(Players[i].is_exists && Players[i].is_alive)
-		{
-			game_over = 0;
-		}
+		game_over = 0;
 	}
 
 	if (game_over) {
@@ -498,6 +505,37 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 				snake->Speed = 2.0f;
 				break;
 			}
+			case 6:
+			{
+				if (Get_NumberOf_Alive_Players > 1)
+				{
+					int leading_player = 0;
+					if (snake->Id == 0)
+					{
+						leading_player = 1;
+					}
+					for (int i = leading_player + 1; i < 4; i++)
+					{
+						if (Players[i].is_exists && Players[i].is_alive && i != snake->Id)
+						{
+							if (Players[i].score > Players[leading_player].score)
+							{
+								leading_player = i;
+							}
+						}
+					}
+					for (int j = -1; j <= 1; j++)
+					{
+						for (int i = -1; i <= 1; i++)
+						{
+							if (grid[(int)Players[leading_player].Position[0].y + j][(int)Players[leading_player].Position[0].x + i] == 0)
+							{
+								grid[(int)Players[leading_player].Position[0].y + j][(int)Players[leading_player].Position[0].x + i] = 5;
+							}
+						}
+					}
+				}
+			}
 		}
 		// - exceeed bounds
 		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
@@ -584,7 +622,7 @@ void Snake_SpawnFood()
 	//Snake_SpawnPwrup();
 }
 
-void Snake_SpawnPwrup()
+void Snake_SpawnPwrup(int PowerUpID)
 {
 	int rand_x;
 	int rand_y;
@@ -593,12 +631,11 @@ void Snake_SpawnPwrup()
 		rand_x = CP_Random_RangeInt(0, GRID_WIDTH - 1);
 		rand_y = CP_Random_RangeInt(0, GRID_HEIGHT - 1);
 		// if not at a snake position & food position
-		if (grid[rand_y][rand_x] != 1) {
-			if(grid[rand_y][rand_x] != 2)
+		if (grid[rand_y][rand_x] == 0) {
 			check = 0;
 		}
 	}
-	grid[rand_y][rand_x] = 3;
+	grid[rand_y][rand_x] = PowerUpID;
 }
 
 void Reset_Game()
@@ -639,4 +676,30 @@ char Check_For_Empty()
 		}
 	}
 	return 0;
+}
+
+int Get_NumberOf_Alive_Players()
+{
+	int counter = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		if (Players[i].is_exists && Players[i].is_alive)
+		{
+			counter++;
+		}
+	}
+	return counter;
+}
+
+int Get_NumberOf_Existing_Players()
+{
+	int counter = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		if (Players[i].is_exists)
+		{
+			counter++;
+		}
+	}
+	return counter;
 }

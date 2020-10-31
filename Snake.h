@@ -78,6 +78,8 @@ void Snake_Free();
 void Snake_Restart();
 void Snake_Shake();
 void Snake_Shake_Update(const float dt);
+int Get_NumberOf_Alive_Players();
+int Get_NumberOf_Existing_Players();
 
 void Snake_DrawSnake(struct Snake_Profile *snake);
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
@@ -85,7 +87,7 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake);
 void Snake_Wrap(struct Snake_Profile *snake);
 
 void Snake_SpawnFood();
-void Snake_SpawnPwrup();
+void Snake_SpawnPwrup(int PowerUpID);
 
 void Reset_Game();
 void Check_For_Food();
