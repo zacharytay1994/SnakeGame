@@ -140,8 +140,8 @@ void Snake_Init()
 {
 	Add_Player(0);
 	Add_Player(1);
-	Add_Player(2);
-	Add_Player(3);
+	//Add_Player(2);
+	//Add_Player(3);
 
 	//Init Highscore
 	FILE* highscore_read;
@@ -820,9 +820,18 @@ void GameOver_Render()
 	CP_Font_DrawText(leaderboards_textwinner, (float)Windows_Width / 2 + 2, 250 + 2);
 	CP_Font_DrawText(leaderboards_textwinnerscore, (float)Windows_Width / 2 + 2, 320 + 2);
 	CP_Settings_TextSize(40);
-	CP_Font_DrawText(leaderboards_text2, (float)Windows_Width / 2 + 2, 420 + 2);
-	CP_Font_DrawText(leaderboards_text3, (float)Windows_Width / 2 + 2, 470 + 2);
-	CP_Font_DrawText(leaderboards_text4, (float)Windows_Width / 2 + 2, 520 + 2);
+	if (Players[1].is_exists)
+	{
+		CP_Font_DrawText(leaderboards_text2, (float)Windows_Width / 2 + 2, 420 + 2);
+	}
+	if (Players[2].is_exists)
+	{
+		CP_Font_DrawText(leaderboards_text3, (float)Windows_Width / 2 + 2, 470 + 2);
+	}
+	if (Players[3].is_exists)
+	{
+		CP_Font_DrawText(leaderboards_text4, (float)Windows_Width / 2 + 2, 520 + 2);
+	}
 
 	if (button_playagain_hover)
 	{
@@ -837,9 +846,18 @@ void GameOver_Render()
 	CP_Font_DrawText(leaderboards_textwinner, (float)Windows_Width / 2, 250);
 	CP_Font_DrawText(leaderboards_textwinnerscore, (float)Windows_Width / 2, 320);
 	CP_Settings_TextSize(40);
-	CP_Font_DrawText(leaderboards_text2, (float)Windows_Width / 2, 420);
-	CP_Font_DrawText(leaderboards_text3, (float)Windows_Width / 2, 470);
-	CP_Font_DrawText(leaderboards_text4, (float)Windows_Width / 2, 520);
+	if (Players[1].is_exists)
+	{
+		CP_Font_DrawText(leaderboards_text2, (float)Windows_Width / 2, 420);
+	}
+	if (Players[2].is_exists)
+	{
+		CP_Font_DrawText(leaderboards_text3, (float)Windows_Width / 2, 470);
+	}
+	if (Players[3].is_exists)
+	{
+		CP_Font_DrawText(leaderboards_text4, (float)Windows_Width / 2, 520);
+	}
 	
 	CP_Settings_TextAlignment(1, 1);
 
