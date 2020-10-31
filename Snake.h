@@ -13,6 +13,7 @@ int GRID_HEIGHT;
 #define DARK_GREEN CP_Color_Create(0,155,0,255)
 #define BLUE CP_Color_Create(0,0,255,255)
 #define DARK_BLUE CP_Color_Create(0,0,155,255)
+#define LIGHT_BLUE CP_Color_Create(155, 155, 255, 155)
 #define YELLOW CP_Color_Create(255,255,0,255)
 #define DARK_YELLOW CP_Color_Create(155,155,0,255)
 #define GREY CP_Color_Create(100,100,100,255)
@@ -44,8 +45,8 @@ typedef enum Snake_Direction {
 struct Snake_Profile
 {
 	short Id;
-	int Speed;
 	int Size;
+	float Speed;
 	float Speed_Multiplier;
 	float Speed_Timer;
 	CP_Vector Position[127 * 127];
