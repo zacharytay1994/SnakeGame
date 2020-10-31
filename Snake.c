@@ -8,11 +8,14 @@ int GRID_START_X = 30;
 int GRID_START_Y = 150;
 int GRID_WIDTH = 19;
 int GRID_HEIGHT = 16;
+int Windows_Width = 900;
+int Windows_Height = 900;
 
 int grid[127][127] = { 0 };
 float snake_speed_timer = 0.0f;
 
 int food_exists = 0;
+int food_multiplier = 1;
 int game_over = 0;
 char text[127] = "";
 struct Snake_Profile Players[4] = { {0} };
@@ -27,18 +30,31 @@ char highscore_text[100];
 char timer[100];
 float timeCount = 0.f;
 
+char leaderboards_textwinner[100];
+char leaderboards_textwinnerscore[100];
+char leaderboards_text2[100];
+char leaderboards_text3[100];
+char leaderboards_text4[100];
+char button_playagain_hover;
+
 CP_Image snake_background;
 
 /*!
  @brief Generates a basic level
  @param void
  @return void
-________________________________________________________________________*/
+*/
 void Level_Init()
 {
 	screen_shake_offset = CP_Vector_Set(0.0f, 0.0f);
 	snake_background = CP_Image_Load("Assets/snakebg.png");
 	CP_System_SetWindowSize(900, 900);
+	food_multiplier = 1;
+	button_playagain_hover = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		Players_Highscore_List[i] = -1;
+	}
 	if (!Level_Load("TestLevel.txt"))
 	{
 		for (int i = 0; i < GRID_HEIGHT; i++)
@@ -229,6 +245,25 @@ void Snake_Update(const float dt)
 		Snake_SpawnFood();
 		Players[0].to_grow = 1;
 	}
+	if (game_over)
+	{
+		if (CP_Input_GetMouseX() > 250 && CP_Input_GetMouseX() < 650 && CP_Input_GetMouseY() > 600 && CP_Input_GetMouseY() < 700)
+		{
+			if (CP_Input_MouseClicked())
+			{
+				button_playagain_hover = 0;
+				Reset_Game();
+			}
+			else
+			{
+				button_playagain_hover = 1;
+			}
+		}
+		else
+		{
+			button_playagain_hover = 0;
+		}
+	}
 	if (!food_exists) {
 		Snake_SpawnFood();
 		if (Get_NumberOf_Alive_Players() > 1 && rand() % 4 == 0)
@@ -243,13 +278,15 @@ void Snake_Update(const float dt)
 	}
 	Snake_Shake_Update(dt);
 
+	CP_Settings_TextSize(TILE_SIZE * 0.85f);
+	CP_Settings_Fill(BLACK);
+	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
 	//Timer Interface
 	if (!game_over)
 	{
 		timeCount += (float)dt;
 		sprintf_s(timer, 100, "Time: %.2f", timeCount);
 	}
-	CP_Font_DrawText(timer, (float)(GRID_WIDTH * 2), (float)(GRID_HEIGHT * 3));
 }
 
 /*
@@ -328,6 +365,8 @@ void Snake_Render()
 		game_over = 0;
 	}
 
+	CP_Settings_TextSize(TILE_SIZE * 0.85f);
+	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
 	if (game_over) {
 		if (Check_For_Empty())
 		{
@@ -337,9 +376,12 @@ void Snake_Render()
 		{
 			sprintf_s(text, 127, "YOU WIN!");
 		}
+		if (Players_Highscore_List[0] == -1)
+		{
+			GameOver_SetHighScore();
+		}
+		GameOver_Render();
 	}
-	CP_Settings_TextSize(TILE_SIZE*0.85f);
-	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
 }
 
 void Snake_Free() {
@@ -401,6 +443,7 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 
 	//Score interface
 	CP_Settings_Fill(RED);
+	CP_Settings_TextSize(TILE_SIZE * 0.85f);
 	switch (snake->Id)
 	{
 	case 0:
@@ -487,6 +530,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 	else { // if timer up move snake once
 		snake->Speed_Timer = 0.0f;
 		snake->Speed = 1.0f;
+		snake->score += 1;
 		CP_Vector last_position = snake->Position[snake->Size - 1];
 		// move snek
 		for (int i = snake->Size - 1; i > 0; i--) {
@@ -626,7 +670,8 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 {
 
 	if (snake->Size < GRID_WIDTH * GRID_HEIGHT) {
-		snake->score++;
+		snake->score += food_multiplier;
+		food_multiplier += 1;
 		snake->Position[snake->Size] = (CP_Vector){ (float)x,(float)y };
 		snake->PositionFollow[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
@@ -681,6 +726,115 @@ void Snake_SpawnPwrup(int PowerUpID)
 		}
 	}
 	grid[rand_y][rand_x] = PowerUpID;
+}
+
+void GameOver_SetHighScore()
+{
+	int leading_player = 0;
+	int leading_player_score = 0;
+	char is_inHighscoreList = 0;
+	for (int h = 0; h < 4; h++)
+	{
+		leading_player = -1;
+		leading_player_score = -1;
+		for (int i = 0; i < 4; i++)
+		{
+			is_inHighscoreList = 0;
+			if (Players[i].is_exists)
+			{
+				if (Players[i].score > leading_player_score)
+				{
+					for (int j = 0; j < 4; j++)
+					{
+						if (Players_Highscore_List[j] == i)
+						{
+							is_inHighscoreList = 1;
+							break;
+						}
+					}
+					if (is_inHighscoreList == 0)
+					{
+						leading_player = i;
+						leading_player_score = Players[i].score;
+					}
+				}
+			}
+		}
+		for (int k = 0; k < 4; k++)
+		{
+			if(Players_Highscore_List[k] == -1)
+			{
+				Players_Highscore_List[k] = leading_player;
+				break;
+			}
+		}
+	}
+	sprintf_s(leaderboards_textwinner, 100, "Player %d wins!", Players_Highscore_List[0] + 1);
+	sprintf_s(leaderboards_textwinnerscore, 100, "Score: %d", Players[Players_Highscore_List[0]].score);
+	sprintf_s(leaderboards_text2, 100, "Player %d\t\t\t\tScore: %3d", Players_Highscore_List[1] + 1, Players[Players_Highscore_List[1]].score);
+	sprintf_s(leaderboards_text3, 100, "Player %d\t\t\t\tScore: %3d", Players_Highscore_List[2] + 1, Players[Players_Highscore_List[2]].score);
+	sprintf_s(leaderboards_text4, 100, "Player %d\t\t\t\tScore: %3d", Players_Highscore_List[3] + 1, Players[Players_Highscore_List[3]].score);
+}
+
+void GameOver_Render()
+{
+	switch (Players_Highscore_List[0])
+	{
+	case 0:
+	{
+		CP_Settings_Fill(DARK_GREEN_TRANSLUCENT);
+		break;
+	}
+	case 1:
+	{
+		CP_Settings_Fill(DARK_BLUE_TRANSLUCENT);
+		break;
+	}
+	case 2:
+	{
+		CP_Settings_Fill(DARK_RED_TRANSLUCENT);
+		break;
+	}
+	case 3:
+	{
+		CP_Settings_Fill(DARK_YELLOW_TRANSLUCENT);
+		break;
+	}
+	}
+	CP_Graphics_DrawRect(0, 0, (float)CP_System_GetWindowWidth(), (float)CP_System_GetWindowHeight());
+	CP_Settings_TextAlignment(2, 2);
+
+	// Shadow
+	CP_Settings_Fill(BLACK);
+	CP_Settings_TextSize(70);
+	CP_Font_DrawText(leaderboards_textwinner, (float)Windows_Width / 2 + 2, 250 + 2);
+	CP_Font_DrawText(leaderboards_textwinnerscore, (float)Windows_Width / 2 + 2, 320 + 2);
+	CP_Settings_TextSize(40);
+	CP_Font_DrawText(leaderboards_text2, (float)Windows_Width / 2 + 2, 420 + 2);
+	CP_Font_DrawText(leaderboards_text3, (float)Windows_Width / 2 + 2, 470 + 2);
+	CP_Font_DrawText(leaderboards_text4, (float)Windows_Width / 2 + 2, 520 + 2);
+
+	if (button_playagain_hover)
+	{
+		CP_Settings_Fill(GREY);
+	}
+	CP_Graphics_DrawRect((float)Windows_Width / 2 - 200, 600, 400, 100);
+	CP_Settings_Fill(BLACK);
+	CP_Graphics_DrawRect((float)Windows_Width / 2 - 200, 750, 400, 100);
+
+	CP_Settings_Fill(WHITE);
+	CP_Settings_TextSize(70);
+	CP_Font_DrawText(leaderboards_textwinner, (float)Windows_Width / 2, 250);
+	CP_Font_DrawText(leaderboards_textwinnerscore, (float)Windows_Width / 2, 320);
+	CP_Settings_TextSize(40);
+	CP_Font_DrawText(leaderboards_text2, (float)Windows_Width / 2, 420);
+	CP_Font_DrawText(leaderboards_text3, (float)Windows_Width / 2, 470);
+	CP_Font_DrawText(leaderboards_text4, (float)Windows_Width / 2, 520);
+	
+	CP_Settings_TextAlignment(1, 1);
+
+	CP_Settings_TextSize(80);
+	CP_Font_DrawText("PLAY AGAIN", (float)Windows_Width / 2 - 175, 675);
 }
 
 /*

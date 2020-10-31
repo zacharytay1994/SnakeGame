@@ -9,13 +9,17 @@ int GRID_HEIGHT;
 // PLAYER COLORS
 #define RED CP_Color_Create(255,0,0,255)
 #define DARK_RED CP_Color_Create(155,0,0,255)
+#define DARK_RED_TRANSLUCENT CP_Color_Create(155,0,0,200)
 #define GREEN CP_Color_Create(0,255,0,255)
 #define DARK_GREEN CP_Color_Create(0,155,0,255)
+#define DARK_GREEN_TRANSLUCENT CP_Color_Create(0,155,0,200)
 #define BLUE CP_Color_Create(0,0,255,255)
 #define DARK_BLUE CP_Color_Create(0,0,155,255)
+#define DARK_BLUE_TRANSLUCENT CP_Color_Create(0,0,155,200)
 #define LIGHT_BLUE CP_Color_Create(155, 155, 255, 155)
 #define YELLOW CP_Color_Create(255,255,0,255)
 #define DARK_YELLOW CP_Color_Create(155,155,0,255)
+#define DARK_YELLOW_TRANSLUCENT CP_Color_Create(155,155,0,200)
 #define GREY CP_Color_Create(100,100,100,255)
 #define BLACK CP_Color_Create(0, 0, 0, 200)
 
@@ -63,6 +67,7 @@ struct Snake_Profile
 	
 };
 struct Snake_Profile Players[4];
+int Players_Highscore_List[4];
 void Add_Player(short id);
 
 void Level_Init();
@@ -84,6 +89,8 @@ void Snake_Wrap(struct Snake_Profile *snake);
 
 void Snake_SpawnFood();
 void Snake_SpawnPwrup(int PowerUpID);
+void GameOver_SetHighScore();
+void GameOver_Render();
 
 void Reset_Game();
 void Check_For_Food();
