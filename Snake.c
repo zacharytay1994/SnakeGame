@@ -507,7 +507,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			}
 			case 6:
 			{
-				if (Get_NumberOf_Alive_Players > 1)
+				if (Get_NumberOf_Alive_Players() > 1)
 				{
 					int leading_player = 0;
 					if (snake->Id == 0)
