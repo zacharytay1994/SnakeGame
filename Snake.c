@@ -255,25 +255,26 @@ void Snake_Render()
 	// render food
 	for (int y = 0; y < GRID_HEIGHT; y++) {
 		for (int x = 0; x < GRID_WIDTH; x++) {
-			if (grid[y][x] == 2) {
-				CP_Settings_Fill(GREY);
-				CP_Graphics_DrawCircle(((float)x * TILE_SIZE + (TILE_SIZE/2) + GRID_START_X) + screen_shake_offset.x, ((float)y * TILE_SIZE + (TILE_SIZE/2) + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE);
-			}
-		}
-	}
-	for (int y = 0; y < GRID_HEIGHT; y++) {
-		for (int x = 0; x < GRID_WIDTH; x++) {
-			if (grid[y][x] == 3) {
-				CP_Settings_Fill(YELLOW);
-				CP_Graphics_DrawCircle((float)x * TILE_SIZE + (TILE_SIZE/2) + GRID_START_X, (float)y * TILE_SIZE + (TILE_SIZE/2) + GRID_START_Y, TILE_SIZE);
-			}
-		}
-	}
-	for (int y = 0; y < GRID_HEIGHT; y++) {
-		for (int x = 0; x < GRID_WIDTH; x++) {
-			if (grid[y][x] == 4) {
-				CP_Settings_Fill(BLACK);
-				CP_Graphics_DrawRect((float)x * TILE_SIZE + GRID_START_X, (float)y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
+			switch (grid[y][x])
+			{
+				case 2:
+				{
+					CP_Settings_Fill(GREY);
+					CP_Graphics_DrawCircle(((float)x * TILE_SIZE + (TILE_SIZE / 2) + GRID_START_X) + screen_shake_offset.x, ((float)y * TILE_SIZE + (TILE_SIZE / 2) + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE);
+					break;
+				}
+				case 3:
+				{
+					CP_Settings_Fill(YELLOW);
+					CP_Graphics_DrawCircle((float)x * TILE_SIZE + (TILE_SIZE / 2) + GRID_START_X, (float)y * TILE_SIZE + (TILE_SIZE / 2) + GRID_START_Y, TILE_SIZE);
+					break;
+				}
+				case 4:
+				{
+					CP_Settings_Fill(BLACK);
+					CP_Graphics_DrawRect((float)x * TILE_SIZE + GRID_START_X, (float)y * TILE_SIZE + GRID_START_Y, TILE_SIZE, TILE_SIZE);
+					break;
+				}
 			}
 		}
 	}
@@ -344,8 +345,16 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		}
 		else { CP_Settings_Fill(snake->BodyColor); }
 		float ratio_moved = snake->Speed_Timer / (float)(snake->Speed * snake->Speed_Multiplier);
-		snake->PositionFollow[i].x = CP_Math_LerpFloat(snake->PositionFollow[i].x, snake->Position[i].x, ratio_moved);
-		snake->PositionFollow[i].y = CP_Math_LerpFloat(snake->PositionFollow[i].y, snake->Position[i].y, ratio_moved);
+		if (snake->is_alive)
+		{
+			snake->PositionFollow[i].x = CP_Math_LerpFloat(snake->PositionFollow[i].x, snake->Position[i].x, ratio_moved);
+			snake->PositionFollow[i].y = CP_Math_LerpFloat(snake->PositionFollow[i].y, snake->Position[i].y, ratio_moved);
+		}
+		else
+		{
+			snake->PositionFollow[i].x = snake->Position[i].x;
+			snake->PositionFollow[i].y = snake->Position[i].y;
+		}
 		CP_Graphics_DrawRect((snake->PositionFollow[i].x * TILE_SIZE + GRID_START_X) + screen_shake_offset.x, (snake->PositionFollow[i].y * TILE_SIZE + GRID_START_Y) + screen_shake_offset.y, TILE_SIZE, TILE_SIZE);
 	}
 
