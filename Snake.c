@@ -14,7 +14,6 @@ float snake_speed_timer = 0.0f;
 
 int food_exists = 0;
 int game_over = 0;
-//char* text = "";
 char text[127] = "";
 struct Snake_Profile Players[4] = { {0} };
 
@@ -236,8 +235,6 @@ void Snake_Render()
 	float screen_center_y = window_height / 2.0f;
 	// render background
 	CP_Image_Draw(snake_background, screen_center_x, screen_center_y, window_width + 100.0f, window_height + 100.0f, 100);
-	//// render grid bg
-	//CP_Image_Draw(gridbg, GRID_START_X + (float)(GRID_WIDTH*TILE_SIZE)/2.0f, GRID_START_Y + (float)(GRID_HEIGHT * TILE_SIZE)/2.0f, GRID_WIDTH*TILE_SIZE, GRID_HEIGHT*TILE_SIZE, 100);
 	// render the grid x and y
 	for (int x = 0; x < GRID_WIDTH+1; x++) {
 		float x0 = (GRID_START_X + x * TILE_SIZE) + screen_shake_offset.x;
@@ -302,7 +299,6 @@ void Snake_Render()
 	}
 
 	if (game_over) {
-		//text = "GAME OVER!";
 		if (Check_For_Empty())
 		{
 			sprintf_s(text, 127, "GAME OVER!");
@@ -312,7 +308,6 @@ void Snake_Render()
 			sprintf_s(text, 127, "YOU WIN!");
 		}
 	}
-	//CP_Font_DrawText(text, 100.0f, 700.0f);
 	CP_Settings_TextSize(TILE_SIZE*0.85f);
 	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
 }
@@ -330,19 +325,7 @@ void Snake_Shake_Update(const float dt)
 {
 	screen_shake_offset.x = CP_Random_RangeFloat(-5.0f * screen_shake_value, 5.0f * screen_shake_value);
 	screen_shake_offset.y = CP_Random_RangeFloat(-5.0f * screen_shake_value, 5.0f * screen_shake_value);
-	// dampen
-	/*if (screen_shake_offset.x > 1.0f) {
-		screen_shake_offset.x = CP_Math_LerpFloat(screen_shake_offset.x, 0.0f, CP_System_GetDt());
-	}
-	else {
-		screen_shake_offset.x = 0.0f;
-	}
-	if (screen_shake_offset.y > 1.0f) {
-		screen_shake_offset.y = CP_Math_LerpFloat(screen_shake_offset.y, 0.0f, CP_System_GetDt());
-	}
-	else {
-		screen_shake_offset.y = 0.0f;
-	}*/
+
 	if (screen_shake_value > 0.0f) {
 		screen_shake_value = CP_Math_LerpFloat(screen_shake_value, 0.0f, CP_System_GetDt() * 4.0f);
 	}
@@ -474,13 +457,15 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			break;
 		}
 		snake->PreviousDirection = snake->Direction;
+		// - exceeed bounds
+		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
+			Snake_Wrap(snake);
+		}
 		// if snake collide with food
 		if (grid[(int)snake->Position[0].y][(int)snake->Position[0].x] == 2) {
 			snake->to_grow = 1;
 			Particle_Burst((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y },
 				10, 30.0f, 90.0f, 120.0f, 240.0f, 30.0f, 120.0f);
-			//Particle_Add((CP_Vector) { snake->Position[0].x* TILE_SIZE + GRID_START_X, snake->Position[0].y* TILE_SIZE + GRID_START_Y }, CP_Vector_Set(1.0f,0.0f), 30.0f);
-			//Check_For_Food();
 		}
 		
 		switch(grid[(int)snake->Position[0].y][(int)snake->Position[0].x])
@@ -537,13 +522,6 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 				}
 			}
 		}
-		// - exceeed bounds
-		if ((int)snake->Position[0].y < 0 || (int)snake->Position[0].y >= GRID_HEIGHT || (int)snake->Position[0].x < 0 || (int)snake->Position[0].x >= GRID_WIDTH) {
-			//game_over = 1;
-			//snake->is_alive = 0;
-			//sprintf_s(text, 127, "Player %d died by border!", snake->Id + 1);
-			Snake_Wrap(snake);
-		}
 		// set last position of snake in grid to 0
 		if (snake->to_grow) { // if to grow, add a new snake cell at last position
 			Snake_GrowSnake((int)last_position.x, (int)last_position.y, snake);
@@ -588,8 +566,6 @@ void Snake_GrowSnake(const int x, const int y, struct Snake_Profile *snake)
 
 	if (snake->Size < GRID_WIDTH * GRID_HEIGHT) {
 		snake->score++;
-		//highscore = fopen("highscore.txt", "w");
-		//fscanf(highscore, "%c", snake->score);
 		snake->Position[snake->Size] = (CP_Vector){ (float)x,(float)y };
 		snake->PositionFollow[snake->Size++] = (CP_Vector){ (float)x,(float)y };
 		grid[y][x] = 1;
@@ -618,8 +594,6 @@ void Snake_SpawnFood()
 		}
 	}
 	grid[rand_y][rand_x] = 2;
-
-	//Snake_SpawnPwrup();
 }
 
 void Snake_SpawnPwrup(int PowerUpID)

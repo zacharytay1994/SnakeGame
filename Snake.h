@@ -30,9 +30,6 @@ int GRID_START_Y;
 //int SNAKE_SPEED;
 
 extern int grid[127][127]; // 0 empty, 1 snake, 2 food, 3 pwrup
-//extern CP_Vector snake[GRID_WIDTH * GRID_HEIGHT];
-//extern int snake_size;
-//extern float snake_speed_multiplier;
 
 typedef enum Snake_Direction {
 	Right = 0,
@@ -40,7 +37,6 @@ typedef enum Snake_Direction {
 	Up = 90,
 	Down = 270
 } Snake_Direction;
-//extern int snake_direction;
 
 struct Snake_Profile
 {
