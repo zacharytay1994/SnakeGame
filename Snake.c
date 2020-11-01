@@ -151,8 +151,10 @@ void Snake_Init()
 	//Init Highscore
 	FILE* highscore_read;
 	fopen_s(&highscore_read, "highscore.txt", "r");
-	fscanf_s(highscore_read, "%d", &highscore);
-	fclose(highscore_read);
+	if (highscore_read) {
+		fscanf_s(highscore_read, "%d", &highscore);
+		fclose(highscore_read);
+	}
 }
 
 /*
@@ -511,8 +513,10 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	//Init Highscore
 	FILE* highscore_read;
 	fopen_s(&highscore_read, "highscore.txt", "r");
-	fscanf_s(highscore_read, "%d", &updated_highscore);
-	fclose(highscore_read);
+	if (highscore_read) {
+		fscanf_s(highscore_read, "%d", &updated_highscore);
+		fclose(highscore_read);
+	}
 
 	//Update Highscore data 
 	if (game_over)

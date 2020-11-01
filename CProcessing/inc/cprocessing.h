@@ -189,7 +189,7 @@ CP_API CP_Font			CP_Font_GetDefault					(void);
 CP_API CP_Font			CP_Font_Load						(const char* filepath);
 CP_API void				CP_Font_Set							(CP_Font font);
 CP_API void				CP_Font_DrawText					(const char* text, float x, float y);
-CP_API void				CP_Font_DrawTextBox					(const char* text, float x, float y, float rowWidth);
+CP_API void					CP_Font_DrawTextBox					(const char* text, float x, float y, float rowWidth);
 
 
 //---------------------------------------------------------

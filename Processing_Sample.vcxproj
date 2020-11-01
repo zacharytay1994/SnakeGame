@@ -191,12 +191,17 @@ xcopy "$(ProjectDir)Assets\*" "$(OutDir)Assets\" /s /r /y /q</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
+    <ClCompile Include="Menu.c" />
     <ClCompile Include="Particle.c" />
     <ClCompile Include="Snake.c" />
     <ClCompile Include="SplashScreen.c" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClInclude Include="GameState.h" />
+=======
+    <ClInclude Include="Menu.h" />
+>>>>>>> origin/Jiamin_Branch_v3
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Powerup.h" />
     <ClInclude Include="Snake.h" />

@@ -19,6 +19,9 @@
 #include "SplashScreen.h"
 
 enum GameState game_state;
+#include "Menu.h"
+
+int is_menu = 1;
 
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
@@ -68,6 +71,16 @@ void game_update(void)
 			CP_Engine_Terminate();
 			break;
 		}
+	if (is_menu) {
+		Menu_Update();
+		Menu_FlagStart(&is_menu);
+	}
+	else {
+		// check input, update simulation, render etc.
+		Snake_Update(CP_System_GetDt());
+		Particle_Update(CP_System_GetDt());
+		Particle_Render();
+		Snake_Render();
 	}
 }
 
@@ -84,7 +97,7 @@ void game_exit(void)
 // CP_Engine_Run() is the core function that starts the simulation
 int main(void)
 {
-	CP_Engine_SetNextGameState(game_init, game_update, game_exit);
+	CP_Engine_SetNextGameState(game_init, game_update,game_exit );
 	CP_Engine_Run();
 	return 0;
 }
