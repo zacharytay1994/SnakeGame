@@ -15,13 +15,20 @@
 #include "cprocessing.h"
 #include "Snake.h"
 #include "Particle.h"
+#include "GameState.h"
+#include "SplashScreen.h"
+
+enum GameState game_state;
 
 // use CP_Engine_SetNextGameState to specify this function as the initialization function
 // this function will be called once at the beginning of the program
 void game_init(void)
 {
+	CP_System_SetWindowSize(900, 900);
 	CP_System_ShowConsole();
+	game_state = SPLASH_SCREEN;
 	// initialize variables and CProcessing settings for this gamestate
+	SplashScreen_Init();
 	Level_Init();
 	Snake_Init();
 }
@@ -31,10 +38,37 @@ void game_init(void)
 void game_update(void)
 {
 	// check input, update simulation, render etc.
-	Snake_Update(CP_System_GetDt());
-	Particle_Update(CP_System_GetDt());
-	Particle_Render();
-	Snake_Render();
+	switch (game_state)
+	{
+		case SPLASH_SCREEN:
+		{
+			if (SplashScreen_Render(CP_System_GetDt()))
+			{
+				game_state = SNAKE_GAME;
+			}
+			break;
+		}
+		case MAIN_MENU:
+		{
+			break;
+		}
+		case SNAKE_GAME:
+		{
+			if (Snake_Update(CP_System_GetDt()))
+			{
+				//game_state = MAIN_MENU;
+			}
+			Particle_Update(CP_System_GetDt());
+			Particle_Render();
+			Snake_Render();
+			break;
+		}
+		case END:
+		{
+			CP_Engine_Terminate();
+			break;
+		}
+	}
 }
 
 // use CP_Engine_SetNextGameState to specify this function as the exit function

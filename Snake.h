@@ -75,7 +75,7 @@ void Add_Player(short id);
 void Level_Init();
 char Level_Load(char* filename);
 void Snake_Init();
-void Snake_Update(const float dt);
+char Snake_Update(const float dt);
 void Snake_Render();
 void Snake_Free();
 void Snake_Restart();

@@ -37,6 +37,7 @@ char leaderboards_text2[100];
 char leaderboards_text3[100];
 char leaderboards_text4[100];
 char button_playagain_hover;
+char button_mainmenu_hover;
 
 char lighting_enabled = 0;
 
@@ -51,9 +52,10 @@ void Level_Init()
 {
 	screen_shake_offset = CP_Vector_Set(0.0f, 0.0f);
 	snake_background = CP_Image_Load("Assets/snakebg.png");
-	CP_System_SetWindowSize(900, 900);
+	//CP_System_SetWindowSize(900, 900);
 	food_multiplier = 1;
 	button_playagain_hover = 0;
+	button_mainmenu_hover = 0;
 	for (int i = 0; i < 4; i++)
 	{
 		Players_Highscore_List[i] = -1;
@@ -237,9 +239,9 @@ void Add_Player(short id)
 /*
  @brief Updates game
  @param dt - DeltaTime
- @return void
+ @return 1 if return to main menu
 */
-void Snake_Update(const float dt)
+char Snake_Update(const float dt)
 {
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
 	CP_Font_DrawText("Press R to restart", (float)(GRID_WIDTH * 35), (float)(GRID_HEIGHT * 7));
@@ -250,10 +252,11 @@ void Snake_Update(const float dt)
 			Snake_UpdateSnake(dt, &Players[i]);
 		}
 	}
-	if (CP_Input_MouseClicked()) {
-		Snake_SpawnFood();
-		Players[0].to_grow = 1;
-	}
+	//DEBUG CHEAT
+	//if (CP_Input_MouseClicked()) {
+	//	Snake_SpawnFood();
+	//	Players[0].to_grow = 1;
+	//}
 	if (game_over)
 	{
 		if (CP_Input_GetMouseX() > 250 && CP_Input_GetMouseX() < 650 && CP_Input_GetMouseY() > 600 && CP_Input_GetMouseY() < 700)
@@ -268,9 +271,22 @@ void Snake_Update(const float dt)
 				button_playagain_hover = 1;
 			}
 		}
+		else if (CP_Input_GetMouseX() > 250 && CP_Input_GetMouseX() < 650 && CP_Input_GetMouseY() > 750 && CP_Input_GetMouseY() < 850)
+		{
+			if (CP_Input_MouseClicked())
+			{
+				button_mainmenu_hover = 0;
+				return 1;
+			}
+			else
+			{
+				button_mainmenu_hover = 1;
+			}
+		}
 		else
 		{
 			button_playagain_hover = 0;
+			button_mainmenu_hover = 0;
 		}
 	}
 	if (!food_exists) {
@@ -296,6 +312,7 @@ void Snake_Update(const float dt)
 		timeCount += (float)dt;
 		sprintf_s(timer, 100, "Time: %.2f", timeCount);
 	}
+	return 0;
 }
 
 /*
@@ -856,6 +873,10 @@ void GameOver_Render()
 	}
 	CP_Graphics_DrawRect((float)Windows_Width / 2 - 200, 600, 400, 100);
 	CP_Settings_Fill(BLACK);
+	if (button_mainmenu_hover)
+	{
+		CP_Settings_Fill(GREY);
+	}
 	CP_Graphics_DrawRect((float)Windows_Width / 2 - 200, 750, 400, 100);
 
 	CP_Settings_Fill(WHITE);
@@ -880,6 +901,7 @@ void GameOver_Render()
 
 	CP_Settings_TextSize(80);
 	CP_Font_DrawText("PLAY AGAIN", (float)Windows_Width / 2 - 175, 675);
+	CP_Font_DrawText("MAIN MENU", (float)Windows_Width / 2 - 175, 825);
 }
 
 /*
