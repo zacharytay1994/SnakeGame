@@ -143,8 +143,8 @@ void Snake_Init()
 {
 	Add_Player(0);
 	Add_Player(1);
-	//Add_Player(2);
-	//Add_Player(3);
+	Add_Player(2);
+	Add_Player(3);
 
 	//Init Highscore
 	FILE* highscore_read;
