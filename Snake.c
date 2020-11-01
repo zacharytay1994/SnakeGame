@@ -2,6 +2,7 @@
 #include "Particle.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 float TILE_SIZE = 30.f;
 int GRID_START_X = 30;
@@ -36,6 +37,8 @@ char leaderboards_text2[100];
 char leaderboards_text3[100];
 char leaderboards_text4[100];
 char button_playagain_hover;
+
+char lighting_enabled = 0;
 
 CP_Image snake_background;
 
@@ -212,6 +215,12 @@ void Add_Player(short id)
 		snake_new.Position[i].x = starting_position_x;
 		snake_new.Position[i].y = starting_position_y;
 	}
+	for (int i = 0; i < 16129; i++)
+	{
+		snake_new.Lighting[i].x = -1;
+		snake_new.Lighting[i].y = -1;
+		snake_new.Lighting_Angle[i] = -1;
+	}
 	snake_new.Id = id;
 	snake_new.Size = 0;
 	snake_new.Speed_Multiplier = 0.25f;
@@ -311,6 +320,20 @@ void Snake_Render()
 		float y0 = GRID_START_Y + y * TILE_SIZE;
 		CP_Graphics_DrawLine((float)GRID_START_X, y0, (float)GRID_START_X + GRID_WIDTH * TILE_SIZE, y0);
 	}
+	// render snake lighting
+	if (lighting_enabled)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			if (Players[i].is_exists == 1)
+			{
+				if (Players[i].is_alive)
+				{
+					Draw_Lighting(&Players[i]);
+				}
+			}
+		}
+	}
 	// render snake
 	for (int i = 0; i < 4; i++)
 	{
@@ -366,7 +389,7 @@ void Snake_Render()
 	}
 
 	CP_Settings_TextSize(TILE_SIZE * 0.85f);
-	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y);
+	CP_Font_DrawText(text, (float)CP_System_GetWindowWidth() / 3, (float)GRID_START_Y -5);
 	if (game_over) {
 		if (Check_For_Empty())
 		{
@@ -442,7 +465,11 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 	}
 
 	//Score interface
-	CP_Settings_Fill(RED);
+	CP_Settings_Fill(BLACK);
+	if (snake->Id == Get_LeadingPlayer() && !game_over)
+	{
+		CP_Settings_Fill(RED);
+	}
 	CP_Settings_TextSize(TILE_SIZE * 0.85f);
 	switch (snake->Id)
 	{
@@ -499,6 +526,7 @@ void Snake_DrawSnake(struct Snake_Profile *snake)
 		sprintf_s(highscore_text, 100, "Highscore: %d", updated_highscore);
 		CP_Font_DrawText(highscore_text, (float)(GRID_WIDTH * 37), (float)(GRID_HEIGHT * 5));
 	}
+	
 }
 
 /*
@@ -568,7 +596,8 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			{
 				// game over conditions - hit itself
 				snake->is_alive = 0;
-				sprintf_s(text, 127, "Player %d died by snake!", snake->Id + 1);
+				int killer_snake = Get_SnakeFromPosition((int)snake->Position[0].x, (int)snake->Position[0].y);
+				sprintf_s(text, 127, "Player %d killed by Player %d!", snake->Id + 1, killer_snake + 1);
 				break;
 			}
 			case 4:
@@ -588,21 +617,7 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 			{
 				if (Get_NumberOf_Alive_Players() > 1)
 				{
-					int leading_player = 0;
-					if (snake->Id == 0)
-					{
-						leading_player = 1;
-					}
-					for (int i = leading_player + 1; i < 4; i++)
-					{
-						if (Players[i].is_exists && Players[i].is_alive && i != snake->Id)
-						{
-							if (Players[i].score > Players[leading_player].score)
-							{
-								leading_player = i;
-							}
-						}
-					}
+					int leading_player = Get_LeadingPlayer();
 					for (int j = -1; j <= 1; j++)
 					{
 						for (int i = -1; i <= 1; i++)
@@ -631,7 +646,9 @@ void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake)
 
 		Check_For_Food();
 	}
-
+	
+	if(lighting_enabled)
+		Add_Darkness(snake);
 	
 }
 
@@ -954,4 +971,417 @@ int Get_NumberOf_Existing_Players()
 		}
 	}
 	return counter;
+}
+
+int Get_LeadingPlayer()
+{
+	int leading_player = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		if (Players[i].is_exists && Players[i].is_alive)
+		{
+			if (Players[i].score > Players[leading_player].score)
+			{
+				leading_player = i;
+			}
+		}
+	}
+	return leading_player;
+}
+
+// PROTOTYPE 
+int Get_SnakeFromPosition(int x, int y)
+{
+	if (grid[y][x] != 1)
+	{
+		return -1;
+	}
+
+	for (int h = 0; h < 4; h++)
+	{
+		if (Players[h].is_exists)
+		{
+			for (int i = 0; i < Players[h].Size; i++)
+			{
+				if (Players[h].Position[i].x == x && Players[h].Position[i].y)
+				{
+					return h;
+				}
+			}
+		}
+	}
+	return -1;
+}
+
+void Add_Darkness(struct Snake_Profile* snake)
+{
+	// Generate raycasting
+	for (int i = 0; i < GRID_HEIGHT; i++)
+	{
+		for (int j = 0; j < GRID_WIDTH; j++)
+		{
+			float T1 = 0.0f;	// T1 > 0, if T1 = 0, no interserction
+			if (grid[i][j] == 4)
+			{
+				for (int u = 0; u < 3; u++)
+				{
+					for (int p = 0; p < 4; p++)
+					{
+						T1 = 0.0f;
+						// snake = (snake->PositionFollow[0].x  * TILE_SIZE + GRID_START_X + (TILE_SIZE/2)) + Ray_X * T1
+						// snake = (snake->PositionFollow[0].y  * TILE_SIZE + GRID_START_y + (TILE_SIZE/2)) + Ray_Y * T1
+						float X = j * TILE_SIZE + GRID_START_X;
+						float Y = i * TILE_SIZE + GRID_START_Y;
+						switch (p)
+						{
+							case 0:
+							{
+								X = j * TILE_SIZE + GRID_START_X;
+								Y = i * TILE_SIZE + GRID_START_Y;
+								if (j > 0 && grid[i][j - 1] == 4) // left
+								{
+									continue;
+								}
+								else if (j > 0 && i > 0 && grid[i - 1][j - 1] == 4)
+								{
+									
+								}
+								else if (i > 0 && grid[i - 1][j] == 4) // up
+								{
+									continue;
+								}
+								break;
+							}
+							case 1:
+							{
+								X = j * TILE_SIZE + GRID_START_X + TILE_SIZE;
+								Y = i * TILE_SIZE + GRID_START_Y;
+								if (j < GRID_WIDTH - 1 && grid[i][j + 1] == 4) // right
+								{
+									continue;
+								}
+								else if((j < GRID_WIDTH - 1 && i > 0 && grid[i - 1][j + 1] == 4))
+								{
+									break;
+								}
+								else if (i > 0 && grid[i - 1][j] == 4)			// up
+								{
+									continue;
+								}
+								break;
+							}
+							case 2:
+							{
+								X = j * TILE_SIZE + GRID_START_X;
+								Y = i * TILE_SIZE + GRID_START_Y + TILE_SIZE;
+								if (i < GRID_HEIGHT - 1 && grid[i + 1][j] == 4)			// down
+								{
+									continue;
+								}
+								else if (i < GRID_HEIGHT - 1 && j > 0 && grid[i + 1][j - 1] == 4)
+								{
+
+								}
+								else if (j > 0 && grid[i][j - 1] == 4)					// left
+								{
+									continue;
+								}
+								break;
+							}
+							case 3:
+							{
+								X = j * TILE_SIZE + GRID_START_X + TILE_SIZE;
+								Y = i * TILE_SIZE + GRID_START_Y + TILE_SIZE;
+								if (j < GRID_WIDTH - 1 && grid[i][j + 1] == 4)		// right
+								{
+									continue;
+								}
+								else if (j < GRID_WIDTH - 1 && i < GRID_HEIGHT - 1 && grid[i + 1][j + 1] == 4)
+								{
+
+								}
+								else if (i < GRID_HEIGHT - 1 && grid[i + 1][j] == 4)	// down
+								{
+									continue;
+								}
+								break;
+							}
+						}
+						switch (u)
+						{
+							case 1:
+							{
+								float hold_X = X;
+								float hold_Y = Y;
+								X = (float)(hold_X * cos(0.1) - hold_Y * sin(0.1));
+								Y = (float)(hold_X * sin(0.1) + hold_Y * cos(0.1));
+								break;
+							}
+							case 2:
+							{
+								float hold_X = X;
+								float hold_Y = Y;
+								X = (float)(hold_X * cos(-0.1) - hold_Y * sin(-0.1));
+								Y = (float)(hold_X * sin(-0.1) + hold_Y * cos(-0.1));
+								break;
+							}
+						}
+						float Ray_X = X - (snake->PositionFollow[0].x * TILE_SIZE + GRID_START_X + (TILE_SIZE * 0.5f));
+						float Ray_Y = Y - (snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y + (TILE_SIZE * 0.5f));
+						for (int m = 0; m < GRID_HEIGHT; m++)
+						{
+							for (int n = 0; n < GRID_WIDTH; n++)
+							{
+								if (grid[m][n] == 4)
+								{
+									{
+										for (int q = 0; q < 4; q++)
+										{
+											// line = X2 + X2_D * T2
+											// line = Y2 + Y2_D * T2
+											float X2 = n * TILE_SIZE + GRID_START_X;
+											float Y2 = m * TILE_SIZE + GRID_START_Y;
+											float X2_D = TILE_SIZE;
+											float Y2_D = TILE_SIZE;
+											switch (q)
+											{
+											case 0:
+											{
+												X2 = n * TILE_SIZE + GRID_START_X;
+												Y2 = m * TILE_SIZE + GRID_START_Y;
+												X2_D = TILE_SIZE;
+												Y2_D = 0;
+												if (m > 0 && grid[m - 1][n] == 4) //up
+												{
+													continue;
+												}
+												else if (n > 0 && m > 0 && grid[m - 1][n - 1] == 4) //up-left
+												{
+													// must check
+												}
+												else if (n > 0 && grid[m][n - 1] == 4) //left
+												{
+													continue;
+												}
+												if (n < GRID_WIDTH - 1)
+												{
+													for (int s = n + 1; s < GRID_WIDTH; s++)
+													{
+														if (grid[m][s] == 4)
+														{
+															X2_D += TILE_SIZE;
+														}
+														else
+														{
+															break;
+														}
+													}
+												}
+												break;
+											}
+											case 1:
+											{
+												X2 = n * TILE_SIZE + GRID_START_X;
+												Y2 = m * TILE_SIZE + GRID_START_Y;
+												X2_D = 0;
+												Y2_D = TILE_SIZE;
+												if (n > 0 && grid[m][n - 1] == 4) //left
+												{
+													continue;
+												}
+												else if (n > 0 && m > 0 && grid[m - 1][n - 1] == 4) //up-left
+												{
+													// must check
+												}
+												else if (m > 0 && grid[m - 1][n] == 4) //up
+												{
+													continue;
+												}
+												if (m < GRID_HEIGHT - 1)
+												{
+													for (int s = m + 1; s < GRID_HEIGHT; s++)
+													{
+														if (grid[s][n] == 4)
+														{
+															Y2_D += TILE_SIZE;
+														}
+														else
+														{
+															break;
+														}
+													}
+												}
+												break;
+											}
+											case 2:
+											{
+												X2 = n * TILE_SIZE + GRID_START_X + TILE_SIZE;
+												Y2 = m * TILE_SIZE + GRID_START_Y;
+												X2_D = 0;
+												Y2_D = TILE_SIZE;
+												if (n < GRID_WIDTH - 1 && grid[m][n + 1] == 4) //right
+												{
+													continue;
+												}
+												else if (n < GRID_WIDTH - 1 && m > 0 && grid[m - 1][n + 1] == 4) //up-right
+												{
+													// must check
+												}
+												else if (m > 0 && grid[m - 1][n] == 4) //up
+												{
+													continue;
+												}
+												if (m < GRID_HEIGHT - 1)
+												{
+													for (int s = m + 1; s < GRID_HEIGHT; s++)
+													{
+														if (grid[s][n] == 4)
+														{
+															Y2_D += TILE_SIZE;
+														}
+														else
+														{
+															break;
+														}
+													}
+												}
+												break;
+											}
+											case 3:
+											{
+												X2 = n * TILE_SIZE + GRID_START_X;
+												Y2 = m * TILE_SIZE + GRID_START_Y + TILE_SIZE;
+												X2_D = TILE_SIZE;
+												Y2_D = 0;
+												if (m < GRID_HEIGHT - 1 && grid[m + 1][n] == 4) //down
+												{
+													continue;
+												}
+												else if (n > 0 && m < GRID_HEIGHT - 1 && grid[m + 1][n - 1] == 4) //down-left
+												{
+													// must check
+												}
+												else if (n > 0 && grid[m][n - 1] == 4) //left
+												{
+													continue;
+												}
+												if (n < GRID_WIDTH - 1)
+												{
+													for (int s = n + 1; s < GRID_WIDTH; s++)
+													{
+														if (grid[m][s] == 4)
+														{
+															X2_D += TILE_SIZE;
+														}
+														else
+														{
+															break;
+														}
+													}
+												}
+												break;
+											}
+											}
+											float T2 = (Ray_X * (Y2 - (snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y + (TILE_SIZE * 0.5f))) + Ray_Y * ((snake->PositionFollow[0].x * TILE_SIZE + GRID_START_X + (TILE_SIZE * 0.5f)) - X2)) / (X2_D * Ray_Y - Y2_D * Ray_X);
+											if (T2 < 0 || T2 > 1)
+											{
+												continue;
+											}
+											float T1_temp = (X2 + X2_D * T2 - (snake->PositionFollow[0].x * TILE_SIZE + GRID_START_X + (TILE_SIZE * 0.5f))) / Ray_X;
+											if (T1 == 0 && T1_temp > 0)
+											{
+												T1 = T1_temp;
+											}
+											else if (T1_temp < T1 && T1_temp > 0)
+											{
+												T1 = T1_temp;
+											}
+										}
+									}
+								}
+							}
+						}
+						if (T1 > 0)
+						{
+							for (int z = 0; z < 16129; z++)
+							{
+								if (snake->Lighting[z].x == -1)
+								{
+									snake->Lighting[z].x = (snake->PositionFollow[0].x * TILE_SIZE + GRID_START_X + (TILE_SIZE * 0.5f)) + Ray_X * T1;
+									snake->Lighting[z].y = (snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y + (TILE_SIZE * 0.5f)) + Ray_Y * T1;
+									float diff_y = snake->Lighting[z].y - (snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y + (TILE_SIZE * 0.5f));
+									float diff_x = snake->Lighting[z].x - (snake->PositionFollow[0].x * TILE_SIZE + GRID_START_X + (TILE_SIZE * 0.5f));
+									snake->Lighting_Angle[z] = atan2f((float)fabs(diff_y), (float)fabs(diff_x));
+									if (diff_x < 0 && diff_y > 0)
+									{
+										snake->Lighting_Angle[z] = 3.14159f - snake->Lighting_Angle[z];
+									}
+									else if (diff_x < 0 && diff_y < 0)
+									{
+										snake->Lighting_Angle[z] += 3.14159f;
+									}
+									else if (diff_x > 0 && diff_y < 0)
+									{
+										snake->Lighting_Angle[z] = 6.28319f - snake->Lighting_Angle[z];
+									}
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Sort rays
+	for (int i = 0; i < 16129 && snake->Lighting_Angle[i] != -1; i++)
+	{
+		for (int j = 0; j < 16128 -i && snake->Lighting_Angle[j + 1] != -1; j++)
+		{
+			if (snake->Lighting_Angle[j] > snake->Lighting_Angle[j + 1])
+			{
+				float temp = snake->Lighting_Angle[j];
+				snake->Lighting_Angle[j] = snake->Lighting_Angle[j + 1];
+				snake->Lighting_Angle[j + 1] = temp;
+
+				temp = snake->Lighting[j].x;
+				snake->Lighting[j].x = snake->Lighting[j + 1].x;
+				snake->Lighting[j + 1].x = temp;
+
+				temp = snake->Lighting[j].y;
+				snake->Lighting[j].y = snake->Lighting[j + 1].y;
+				snake->Lighting[j + 1].y = temp;
+			}
+		}
+	}
+}
+
+void Draw_Lighting(struct Snake_Profile* snake)
+{
+	CP_Settings_Fill(BLACK);
+	CP_Graphics_BeginShape();
+	for(int i = 16128; i >= 0; i--)
+	{
+		if (snake->Lighting[i].x == -1)
+		{
+			continue;
+		}	
+		CP_Graphics_AddVertex(snake->Lighting[i].x, snake->Lighting[i].y);
+
+		//CP_Graphics_DrawLine((snake->PositionFollow[0].x * TILE_SIZE + GRID_START_X + (TILE_SIZE * 0.5f)), (snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y + (TILE_SIZE * 0.5f)), snake->Lighting[i].x, snake->Lighting[i].y);
+		snake->Lighting[i].x = -1;
+		snake->Lighting[i].y = -1;
+		snake->Lighting_Angle[i] = -1;
+	}
+	CP_Graphics_AddVertex((float)(GRID_WIDTH * TILE_SIZE + GRID_START_X), snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y);
+	
+	CP_Graphics_AddVertex((float)(GRID_WIDTH * TILE_SIZE + GRID_START_X), (float)(GRID_HEIGHT * TILE_SIZE + GRID_START_Y));
+	CP_Graphics_AddVertex((float)(GRID_START_X), (float)(GRID_HEIGHT * TILE_SIZE + GRID_START_Y));
+	CP_Graphics_AddVertex((float)(GRID_START_X), (float)(GRID_START_Y));
+	CP_Graphics_AddVertex((float)(GRID_WIDTH * TILE_SIZE + GRID_START_X), (float)(GRID_START_Y));
+	
+	CP_Graphics_AddVertex((float)(GRID_WIDTH * TILE_SIZE + GRID_START_X), snake->PositionFollow[0].y * TILE_SIZE + GRID_START_Y);
+	
+	CP_Graphics_EndShape();
 }

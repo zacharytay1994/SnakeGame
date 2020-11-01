@@ -51,6 +51,8 @@ struct Snake_Profile
 	float Speed_Timer;
 	CP_Vector Position[127 * 127];
 	CP_Vector PositionFollow[127 * 127];
+	CP_Vector Lighting[127 * 127];					// 16129
+	float Lighting_Angle[127 * 127];				// 16129
 	Snake_Direction PreviousDirection;
 	Snake_Direction Direction;
 	char to_grow;
@@ -81,6 +83,8 @@ void Snake_Shake();
 void Snake_Shake_Update(const float dt);
 int Get_NumberOf_Alive_Players();
 int Get_NumberOf_Existing_Players();
+int Get_LeadingPlayer();
+int Get_SnakeFromPosition(int x, int y);
 
 void Snake_DrawSnake(struct Snake_Profile *snake);
 void Snake_UpdateSnake(const float dt, struct Snake_Profile *snake);
@@ -95,3 +99,6 @@ void GameOver_Render();
 void Reset_Game();
 void Check_For_Food();
 char Check_For_Empty();
+
+void Add_Darkness(struct Snake_Profile* snake);
+void Draw_Lighting(struct Snake_Profile* snake);
