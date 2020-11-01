@@ -1113,16 +1113,16 @@ void Add_Darkness(struct Snake_Profile* snake)
 							{
 								float hold_X = X;
 								float hold_Y = Y;
-								X = (float)(hold_X * cos(0.1) - hold_Y * sin(0.1));
-								Y = (float)(hold_X * sin(0.1) + hold_Y * cos(0.1));
+								X = (float)(hold_X * cos((0.1 * 0.01745f)) - hold_Y * sin((0.1 * 0.01745f)));
+								Y = (float)(hold_X * sin((0.1 * 0.01745f)) + hold_Y * cos((0.1 * 0.01745f)));
 								break;
 							}
 							case 2:
 							{
 								float hold_X = X;
 								float hold_Y = Y;
-								X = (float)(hold_X * cos(-0.1) - hold_Y * sin(-0.1));
-								Y = (float)(hold_X * sin(-0.1) + hold_Y * cos(-0.1));
+								X = (float)(hold_X * cos((-0.1 * 0.01745f)) - hold_Y * sin((-0.1 * 0.01745f)));
+								Y = (float)(hold_X * sin((-0.1 * 0.01745f)) + hold_Y * cos((-0.1 * 0.01745f)));
 								break;
 							}
 						}
