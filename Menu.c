@@ -13,7 +13,9 @@ const int _Windows_Width = 900;
 const int _Windows_Height = 900;
 
 int Menu_is_menu = 1;
+
 int Menu_High_Score = 0;
+int Menu_Instruction = 0;
 int Menu_Return = 0;
 
 
@@ -29,7 +31,7 @@ void Menu_Update(void)
 	});
 
 	
-	if (Menu_High_Score == 0)
+	if (!Menu_High_Score && !Menu_Instruction)
 	{
 		CP_Image Play1 = CP_Image_Load("Photos/Menu_Button_Play-01.png");
 		CP_Image_Draw(Play1, MENU_BUTTON_X, MENU_BUTTON_Y, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, 255);
@@ -60,6 +62,10 @@ void Menu_Update(void)
 		{
 			CP_Image Play6 = CP_Image_Load("Photos/Menu_Button_Instruction-02.png");
 			CP_Image_Draw(Play6, MENU_BUTTON_X, MENU_BUTTON_Y + 100.0f, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, 255);
+			if (CP_Input_MouseClicked())
+			{
+				Menu_Instruction = 1;
+			}
 		}
 		else if (!(MouseX < 320 || MouseY < 415 || MouseX > 580 || MouseY > 485))
 		{
@@ -79,7 +85,7 @@ void Menu_Update(void)
 			}
 		}
 	}
-	else
+	else if (Menu_High_Score)
 	{
 		int Menu_Score;
 		FILE* Menu_Score_Read;
@@ -113,6 +119,26 @@ void Menu_Update(void)
 			
 		}	
 		
+	}
+	else if (Menu_Instruction) {
+		CP_Image instruction = CP_Image_Load("Photos/Menu_Instruction.png");
+		CP_Image_Draw(instruction, CP_System_GetWindowWidth() / 2.0f, CP_System_GetWindowHeight() / 2.0f, 900.0f, 900.0f, 255);
+		CP_Image Play11 = CP_Image_Load("Photos/Menu_Button_Return-01.png");
+		CP_Image_Draw(Play11, MENU_BUTTON_X, MENU_BUTTON_Y + 600.0f, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, 255);
+
+		float MouseX = CP_Input_GetMouseX();
+		float MouseY = CP_Input_GetMouseY();
+
+		if (!(MouseX < 320 || MouseY < 815 || MouseX > 580 || MouseY > 885))
+		{
+			CP_Image Play12 = CP_Image_Load("Photos/Menu_Button_Return-02.png");
+			CP_Image_Draw(Play12, MENU_BUTTON_X, MENU_BUTTON_Y + 600.0f, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, 255);
+			if (CP_Input_MouseClicked())
+			{
+				Menu_Instruction = 0;
+			}
+		}
+
 	}
 }
 

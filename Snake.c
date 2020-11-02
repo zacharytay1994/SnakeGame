@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+float speed_timer = 0.0f;
+float speed_count = 2.0f;
+
 float TILE_SIZE = 30.f;
 int GRID_START_X = 30;
 int GRID_START_Y = 150;
@@ -245,6 +248,16 @@ void Add_Player(short id)
 */
 char Snake_Update(const float dt)
 {
+	if (speed_timer < speed_count) {
+		speed_timer += dt;
+	}
+	else {
+		speed_timer = 0;
+		for (int sna = 0; sna < 4; sna++) {
+			Players[sna].Speed += 0.2f;
+		}
+	}
+
 	CP_Settings_Background((CP_Color) { 255, 255, 255, 255 });
 	CP_Font_DrawText("Press R to restart", (float)(GRID_WIDTH * 35), (float)(GRID_HEIGHT * 7));
 	for (int i = 0; i < 4; i++)

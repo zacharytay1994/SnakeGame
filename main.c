@@ -47,12 +47,24 @@ void game_update(void)
 		{
 			if (SplashScreen_Render(CP_System_GetDt()))
 			{
-				game_state = SNAKE_GAME;
+				game_state = MAIN_MENU;
 			}
 			break;
 		}
 		case MAIN_MENU:
 		{
+			if (is_menu) {
+				Menu_Update();
+				Menu_FlagStart(&is_menu);
+			}
+			else {
+				// check input, update simulation, render etc.
+				/*Snake_Update(CP_System_GetDt());
+				Particle_Update(CP_System_GetDt());
+				Particle_Render();
+				Snake_Render();*/
+				game_state = SNAKE_GAME;
+			}
 			break;
 		}
 		case SNAKE_GAME:
@@ -71,16 +83,6 @@ void game_update(void)
 			CP_Engine_Terminate();
 			break;
 		}
-	if (is_menu) {
-		Menu_Update();
-		Menu_FlagStart(&is_menu);
-	}
-	else {
-		// check input, update simulation, render etc.
-		Snake_Update(CP_System_GetDt());
-		Particle_Update(CP_System_GetDt());
-		Particle_Render();
-		Snake_Render();
 	}
 }
 
